@@ -1,8 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from '@/lib/auth-client';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { FormInput } from '@/shared/components/ui/FormInput';
+import { FormPasswordInput } from '@/shared/components/ui/FormPasswordInput';
+import { useAuthForm } from '../hooks/useAuthForm';
+import type { AuthFormValues } from '../validation/auth.schema';
 
 interface Props {
   onSuccess: () => void;
@@ -10,160 +17,146 @@ interface Props {
 
 export function StepAuth({ onSuccess }: Props) {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [serverError, setServerError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  // Form state + resolver selection delegated to dedicated hook (SoC)
+  const form = useAuthForm(mode);
+  const { handleSubmit, formState: { isSubmitting } } = form;
+
+  // ── Handlers ────────────────────────────────────────────────────────────
+  const onSubmit = async (values: AuthFormValues) => {
+    setServerError('');
     try {
       if (mode === 'signup') {
-        const { error: authError } = await signUp.email({ name, email, password });
-        if (authError) throw new Error(authError.message ?? 'Sign up failed');
+        const { error } = await signUp.email({
+          name: values.name,
+          email: values.email,
+          password: values.password,
+        });
+        if (error) throw new Error(error.message ?? 'Sign up failed');
       } else {
-        const { error: authError } = await signIn.email({ email, password });
-        if (authError) throw new Error(authError.message ?? 'Sign in failed');
+        const { error } = await signIn.email({
+          email: values.email,
+          password: values.password,
+        });
+        if (error) throw new Error(error.message ?? 'Sign in failed');
       }
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
+      setServerError(err instanceof Error ? err.message : 'Something went wrong');
     }
   };
 
   const handleGoogle = async () => {
-    setError('');
+    setServerError('');
     setGoogleLoading(true);
     try {
-      // Zustand persist (sessionStorage) saves state automatically — no manual save needed
+      // Zustand persist (sessionStorage) saves onboarding state automatically
       await signIn.social({
         provider: 'google',
         callbackURL: `${window.location.origin}/onboarding?complete=1`,
       });
     } catch {
-      setError('Google sign-in failed. Please try again.');
+      setServerError('Google sign-in failed. Please try again.');
       setGoogleLoading(false);
     }
   };
 
+  const switchMode = () => {
+    setMode((m) => (m === 'signup' ? 'signin' : 'signup'));
+    setServerError('');
+  };
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      {/* Heading */}
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           {mode === 'signup' ? 'Create your account' : 'Welcome back'}
         </h2>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           {mode === 'signup'
             ? "You're almost there — just set up your account."
             : 'Sign in to create your new workspace.'}
         </p>
       </div>
 
-      <button
+      {/* OAuth */}
+      <Button
         type="button"
+        variant="outline"
+        className="h-12 w-full rounded-xl border-border/60 text-sm font-medium hover:border-border"
         onClick={handleGoogle}
-        disabled={googleLoading || loading}
-        className="flex w-full items-center justify-center gap-3 rounded-lg border-2 border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-600"
+        disabled={googleLoading || isSubmitting}
       >
         {googleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
         Continue with Google
-      </button>
+      </Button>
 
       <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">or</span>
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground">or</span>
+        <Separator className="flex-1" />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        {mode === 'signup' && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Full name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Smith"
-              required
-              autoComplete="name"
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-900/40"
+      {/* Email / password form */}
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {mode === 'signup' && (
+            <FormInput
+              control={form.control}
+              name="name"
+              label="Full name"
+              inputProps={{ placeholder: 'Jane Smith', autoComplete: 'name' }}
             />
-          </div>
-        )}
+          )}
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Email address
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="jane@company.com"
-            required
-            autoComplete="email"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-900/40"
+          <FormInput
+            control={form.control}
+            name="email"
+            label="Email address"
+            inputProps={{
+              type: 'email',
+              placeholder: 'jane@company.com',
+              autoComplete: 'email',
+            }}
           />
-        </div>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'Min. 8 characters' : 'Your password'}
-              required
-              minLength={8}
-              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 pr-11 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-900/40"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
+          <FormPasswordInput
+            control={form.control}
+            name="password"
+            label="Password"
+            placeholder={mode === 'signup' ? 'Min. 8 characters' : 'Your password'}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+          />
 
-        {error && (
-          <p className="animate-fade-in rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
-            {error}
-          </p>
-        )}
+          {/* Server-side / API errors (separate from field-level validation) */}
+          {serverError && (
+            <p className="animate-fade-in rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {serverError}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={loading || googleLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {mode === 'signup' ? 'Create account' : 'Sign in'}
-        </button>
-      </form>
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-xl text-sm font-semibold"
+            disabled={isSubmitting || googleLoading}
+          >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {mode === 'signup' ? 'Create account' : 'Sign in'}
+          </Button>
+        </form>
+      </Form>
 
-      <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+      {/* Mode toggle */}
+      <p className="text-center text-sm text-muted-foreground">
         {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
         <button
           type="button"
-          onClick={() => {
-            setMode(mode === 'signup' ? 'signin' : 'signup');
-            setError('');
-          }}
-          className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          onClick={switchMode}
+          className="font-semibold text-primary hover:text-primary/80"
         >
           {mode === 'signup' ? 'Sign in' : 'Sign up'}
         </button>

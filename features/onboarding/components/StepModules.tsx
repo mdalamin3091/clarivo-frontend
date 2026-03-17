@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageSquare, BarChart2, BookOpen, ClipboardList, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const MODULES = [
   {
@@ -50,10 +51,10 @@ export function StepModules({ selected, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           What do you need?
         </h2>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Select the modules you want to enable. You can change this later.
         </p>
       </div>
@@ -66,25 +67,24 @@ export function StepModules({ selected, onChange }: Props) {
               key={id}
               type="button"
               onClick={() => toggle(id)}
-              className={`relative flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all duration-150 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              className={cn(
+                'relative flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all duration-150 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isSelected
-                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600'
-              }`}
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card hover:border-border/80',
+              )}
             >
               {isSelected && (
-                <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600">
-                  <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                  <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
                 </span>
               )}
-              <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${bg}`}>
-                <Icon className={`h-5 w-5 ${color}`} />
+              <span className={cn('inline-flex h-9 w-9 items-center justify-center rounded-lg', bg)}>
+                <Icon className={cn('h-5 w-5', color)} />
               </span>
               <div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                  {description}
-                </p>
+                <p className="text-sm font-semibold text-foreground">{label}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
               </div>
             </button>
           );
@@ -92,7 +92,7 @@ export function StepModules({ selected, onChange }: Props) {
       </div>
 
       {selected.length === 0 && (
-        <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">
+        <p className="text-center text-xs text-muted-foreground">
           Select at least one module to continue
         </p>
       )}

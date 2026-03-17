@@ -5,6 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { checkOrgName } from '../api';
 import { queryKeys } from '@/lib/query-keys';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -42,20 +45,20 @@ export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Name your workspace
         </h2>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           This is how your organization will appear to your team and users.
         </p>
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="org-name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <Label htmlFor="org-name" className="text-sm font-medium text-foreground">
           Workspace name
-        </label>
+        </Label>
         <div className="relative">
-          <input
+          <Input
             id="org-name"
             type="text"
             value={value}
@@ -63,22 +66,20 @@ export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
             placeholder="e.g. Acme Corp"
             autoFocus
             autoComplete="off"
-            className={`w-full rounded-lg border bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-all dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 ${
-              isTaken
-                ? 'border-red-400 pr-10 focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/40'
-                : isAvailable
-                  ? 'border-emerald-400 pr-10 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-900/40'
-                  : 'border-zinc-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-600 dark:focus:ring-indigo-900/40'
-            }`}
+            className={cn(
+              'h-12 rounded-xl border-border/60 bg-background px-4 pr-12 text-sm placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20',
+              isTaken && 'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20',
+              isAvailable && 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20',
+            )}
           />
           {value.trim().length >= 2 && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2">
               {isChecking ? (
-                <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : isAvailable ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
               ) : isTaken ? (
-                <XCircle className="h-4 w-4 text-red-500" />
+                <XCircle className="h-4 w-4 text-destructive" />
               ) : null}
             </span>
           )}
@@ -87,13 +88,12 @@ export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
         <div className="min-h-5">
           {value.trim().length >= 2 && !isChecking && (
             <p
-              className={`animate-fade-in text-xs ${
-                isAvailable
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : isTaken
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-zinc-400'
-              }`}
+              className={cn(
+                'animate-fade-in text-xs',
+                isAvailable && 'text-green-600',
+                isTaken && 'text-destructive',
+                !isAvailable && !isTaken && 'text-muted-foreground',
+              )}
             >
               {isAvailable && `"${value.trim()}" is available`}
               {isTaken && `"${value.trim()}" is already taken`}
@@ -103,14 +103,14 @@ export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
         </div>
       </div>
 
-      <div className="rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800/60">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="rounded-lg bg-muted p-4">
+        <p className="text-xs text-muted-foreground">
           A URL-friendly slug will be generated automatically from your workspace name.
         </p>
         {value.trim().length >= 2 && (
-          <p className="mt-1.5 font-mono text-xs text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1.5 font-mono text-xs text-foreground">
             clarivo.app/
-            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="font-semibold text-primary">
               {value
                 .trim()
                 .toLowerCase()

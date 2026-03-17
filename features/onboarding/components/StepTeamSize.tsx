@@ -1,6 +1,7 @@
 'use client';
 
 import { User, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SIZES = [
   { id: '1', label: 'Just me', sub: 'Solo founder', icon: User },
@@ -19,10 +20,10 @@ export function StepTeamSize({ value, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           How big is your team?
         </h2>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Helps us tailor the experience for your organization.
         </p>
       </div>
@@ -35,29 +36,35 @@ export function StepTeamSize({ value, onChange }: Props) {
               key={id}
               type="button"
               onClick={() => onChange(id)}
-              className={`flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              className={cn(
+                'flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isSelected
-                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600'
-              }`}
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-card hover:border-border/80',
+              )}
             >
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                  isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50' : 'bg-zinc-100 dark:bg-zinc-700'
-                }`}
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
+                  isSelected ? 'bg-primary/10' : 'bg-muted',
+                )}
               >
                 <Icon
-                  className={`h-4 w-4 ${isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-500 dark:text-zinc-400'}`}
+                  className={cn(
+                    'h-4 w-4',
+                    isSelected ? 'text-primary' : 'text-muted-foreground',
+                  )}
                 />
               </span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>
+                <p className="text-sm font-semibold text-foreground">{label}</p>
+                <p className="text-xs text-muted-foreground">{sub}</p>
               </div>
               <span
-                className={`h-4 w-4 shrink-0 rounded-full border-2 transition-all ${
-                  isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-zinc-300 dark:border-zinc-600'
-                }`}
+                className={cn(
+                  'h-4 w-4 shrink-0 rounded-full border-2 transition-all',
+                  isSelected ? 'border-primary bg-primary' : 'border-border',
+                )}
               />
             </button>
           );

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
+import { Button } from '@/components/ui/button';
 import { useOnboardingStore } from '../store';
 import { useSetupOrg } from '../hooks/useSetupOrg';
 import { StepModules } from './StepModules';
@@ -57,18 +58,12 @@ export function OnboardingWizard() {
 
   const canProceed = (): boolean => {
     switch (step) {
-      case 0:
-        return modules.length > 0;
-      case 1:
-        return accessibility !== null;
-      case 2:
-        return orgNameAvailable;
-      case 3:
-        return teamSize !== '';
-      case 4:
-        return true;
-      default:
-        return false;
+      case 0: return modules.length > 0;
+      case 1: return accessibility !== null;
+      case 2: return orgNameAvailable;
+      case 3: return teamSize !== '';
+      case 4: return true;
+      default: return false;
     }
   };
 
@@ -87,7 +82,7 @@ export function OnboardingWizard() {
   if (sessionPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -95,13 +90,11 @@ export function OnboardingWizard() {
   if (setupOrgMutation.isPending || isReturnFromOAuth) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600">
-          <Sparkles className="h-7 w-7 text-white" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
+          <Sparkles className="h-7 w-7 text-primary-foreground" />
         </div>
-        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          Setting up your workspace…
-        </p>
-        <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+        <p className="text-sm font-medium text-muted-foreground">Setting up your workspace…</p>
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
   }
@@ -110,25 +103,25 @@ export function OnboardingWizard() {
   const isLastStep = step === totalSteps - 1;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-indigo-50 via-white to-zinc-50 p-4 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-muted/30 p-4">
       <div className="w-full max-w-lg">
         <div className="mb-8 flex justify-center">
           <Logo size="md" />
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-2xl border bg-card shadow-xl">
           {/* Progress indicator */}
-          <div className="border-b border-zinc-100 px-8 py-5 dark:border-zinc-800">
+          <div className="border-b px-8 py-5">
             <div className="flex items-center justify-between">
               {Array.from({ length: totalSteps }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
                       i < step
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : i === step
-                          ? 'bg-indigo-600 text-white ring-4 ring-indigo-100 dark:ring-indigo-950'
-                          : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'
+                          ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
+                          : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {i < step ? '✓' : i + 1}
@@ -136,14 +129,14 @@ export function OnboardingWizard() {
                   {i < totalSteps - 1 && (
                     <div
                       className={`h-0.5 w-8 transition-all duration-500 sm:w-12 ${
-                        i < step ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
+                        i < step ? 'bg-primary' : 'bg-border'
                       }`}
                     />
                   )}
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs font-medium text-zinc-400 dark:text-zinc-500">
+            <p className="mt-3 text-xs font-medium text-muted-foreground">
               Step {step + 1} of {totalSteps} — {STEP_LABELS[step]}
             </p>
           </div>
@@ -171,28 +164,28 @@ export function OnboardingWizard() {
 
           {/* Navigation */}
           {!isAuthStep && (
-            <div className="flex items-center justify-between border-t border-zinc-100 px-8 py-5 dark:border-zinc-800">
-              <button
+            <div className="flex items-center justify-between border-t px-8 py-5">
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={handleBack}
                 disabled={step === 0}
-                className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-100 disabled:invisible dark:text-zinc-400 dark:hover:bg-zinc-800"
+                className={step === 0 ? 'invisible' : ''}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Back
-              </button>
+              </Button>
 
               {setupOrgMutation.isError && (
-                <p className="text-xs text-red-500">
+                <p className="text-xs text-destructive">
                   {(setupOrgMutation.error as Error)?.message ?? 'Failed to create workspace'}
                 </p>
               )}
 
-              <button
+              <Button
                 type="button"
                 onClick={handleNext}
                 disabled={!canProceed() || setupOrgMutation.isPending}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {setupOrgMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -207,12 +200,12 @@ export function OnboardingWizard() {
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </div>
 
-        <p className="mt-6 text-center text-xs text-zinc-400 dark:text-zinc-600">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </p>
       </div>
