@@ -43,9 +43,7 @@ export function StepTeamSize({ value, onChange }: Props) {
             >
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                  isSelected
-                    ? 'bg-indigo-100 dark:bg-indigo-900/50'
-                    : 'bg-zinc-100 dark:bg-zinc-700'
+                  isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50' : 'bg-zinc-100 dark:bg-zinc-700'
                 }`}
               >
                 <Icon
@@ -58,9 +56,7 @@ export function StepTeamSize({ value, onChange }: Props) {
               </div>
               <span
                 className={`h-4 w-4 shrink-0 rounded-full border-2 transition-all ${
-                  isSelected
-                    ? 'border-indigo-600 bg-indigo-600'
-                    : 'border-zinc-300 dark:border-zinc-600'
+                  isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-zinc-300 dark:border-zinc-600'
                 }`}
               />
             </button>

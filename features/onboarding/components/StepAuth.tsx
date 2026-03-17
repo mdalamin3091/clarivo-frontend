@@ -6,10 +6,9 @@ import { signIn, signUp } from '@/lib/auth-client';
 
 interface Props {
   onSuccess: () => void;
-  onBeforeGoogleRedirect: () => void;
 }
 
-export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
+export function StepAuth({ onSuccess }: Props) {
   const [mode, setMode] = useState<'signup' | 'signin'>('signup');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,7 +22,6 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (mode === 'signup') {
         const { error: authError } = await signUp.email({ name, email, password });
@@ -44,8 +42,7 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
     setError('');
     setGoogleLoading(true);
     try {
-      // Save onboarding data BEFORE the OAuth redirect — onSuccess never fires after a page redirect
-      onBeforeGoogleRedirect();
+      // Zustand persist (sessionStorage) saves state automatically — no manual save needed
       await signIn.social({
         provider: 'google',
         callbackURL: `${window.location.origin}/onboarding?complete=1`,
@@ -69,18 +66,13 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
         </p>
       </div>
 
-      {/* Google */}
       <button
         type="button"
         onClick={handleGoogle}
         disabled={googleLoading || loading}
         className="flex w-full items-center justify-center gap-3 rounded-lg border-2 border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition-all hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-600"
       >
-        {googleLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <GoogleIcon />
-        )}
+        {googleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
         Continue with Google
       </button>
 
@@ -90,7 +82,6 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
         <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
       </div>
 
-      {/* Email form */}
       <form onSubmit={handleSubmit} className="space-y-3">
         {mode === 'signup' && (
           <div className="space-y-1.5">
@@ -149,7 +140,7 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
         </div>
 
         {error && (
-          <p className="rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400 animate-fade-in">
+          <p className="animate-fade-in rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
             {error}
           </p>
         )}
@@ -168,7 +159,10 @@ export function StepAuth({ onSuccess, onBeforeGoogleRedirect }: Props) {
         {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
         <button
           type="button"
-          onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError(''); }}
+          onClick={() => {
+            setMode(mode === 'signup' ? 'signin' : 'signup');
+            setError('');
+          }}
           className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           {mode === 'signup' ? 'Sign in' : 'Sign up'}

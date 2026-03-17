@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { checkOrgName } from '@/lib/api';
+import { checkOrgName } from '../api';
+import { queryKeys } from '@/lib/query-keys';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -23,7 +24,7 @@ export function StepOrgName({ value, onChange }: Props) {
   const debouncedName = useDebounce(value.trim(), 600);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ['check-org-name', debouncedName],
+    queryKey: queryKeys.organizations.checkName(debouncedName),
     queryFn: () => checkOrgName(debouncedName),
     enabled: debouncedName.length >= 2,
     staleTime: 10_000,
@@ -81,13 +82,13 @@ export function StepOrgName({ value, onChange }: Props) {
         <div className="min-h-5">
           {value.trim().length >= 2 && !isChecking && (
             <p
-              className={`text-xs ${
+              className={`animate-fade-in text-xs ${
                 isAvailable
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : isTaken
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-zinc-400'
-              } animate-fade-in`}
+              }`}
             >
               {isAvailable && `"${value.trim()}" is available`}
               {isTaken && `"${value.trim()}" is already taken`}
@@ -105,7 +106,11 @@ export function StepOrgName({ value, onChange }: Props) {
           <p className="mt-1.5 font-mono text-xs text-zinc-600 dark:text-zinc-300">
             clarivo.app/
             <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-              {value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')}
+              {value
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')}
             </span>
           </p>
         )}

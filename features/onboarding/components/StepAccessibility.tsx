@@ -52,7 +52,9 @@ export function StepAccessibility({ value, onChange }: Props) {
                   : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600'
               }`}
             >
-              <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+              <span
+                className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${bg}`}
+              >
                 <Icon className={`h-5 w-5 ${color}`} />
               </span>
               <div className="flex-1">

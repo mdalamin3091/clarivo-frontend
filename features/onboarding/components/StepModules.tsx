@@ -22,7 +22,7 @@ const MODULES = [
   {
     id: 'changelog',
     label: 'Changelog',
-    description: 'Keep users informed about what\'s new',
+    description: "Keep users informed about what's new",
     icon: BookOpen,
     color: 'text-emerald-500',
     bg: 'bg-emerald-50 dark:bg-emerald-950/40',
@@ -44,9 +44,7 @@ interface Props {
 
 export function StepModules({ selected, onChange }: Props) {
   const toggle = (id: string) => {
-    onChange(
-      selected.includes(id) ? selected.filter((m) => m !== id) : [...selected, id],
-    );
+    onChange(selected.includes(id) ? selected.filter((m) => m !== id) : [...selected, id]);
   };
 
   return (
