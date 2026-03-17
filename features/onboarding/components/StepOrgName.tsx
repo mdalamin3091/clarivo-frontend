@@ -18,9 +18,10 @@ function useDebounce<T>(value: T, delay: number): T {
 interface Props {
   value: string;
   onChange: (name: string) => void;
+  onAvailabilityChange: (available: boolean) => void;
 }
 
-export function StepOrgName({ value, onChange }: Props) {
+export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
   const debouncedName = useDebounce(value.trim(), 600);
 
   const { data, isFetching, isError } = useQuery({
@@ -33,6 +34,10 @@ export function StepOrgName({ value, onChange }: Props) {
   const isChecking = isFetching || (debouncedName !== value.trim() && value.trim().length >= 2);
   const isAvailable = !isChecking && data?.available === true && !isError;
   const isTaken = !isChecking && data?.available === false;
+
+  useEffect(() => {
+    onAvailabilityChange(isAvailable);
+  }, [isAvailable, onAvailabilityChange]);
 
   return (
     <div className="space-y-6">

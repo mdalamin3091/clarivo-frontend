@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
@@ -34,6 +34,8 @@ export function OnboardingWizard() {
     reset,
   } = useOnboardingStore();
 
+  const [orgNameAvailable, setOrgNameAvailable] = useState(false);
+
   const isReturnFromOAuth = searchParams.get('complete') === '1';
 
   const setupOrgMutation = useSetupOrg({
@@ -60,7 +62,7 @@ export function OnboardingWizard() {
       case 1:
         return accessibility !== null;
       case 2:
-        return orgName.trim().length >= 2;
+        return orgNameAvailable;
       case 3:
         return teamSize !== '';
       case 4:
@@ -150,7 +152,13 @@ export function OnboardingWizard() {
           <div key={step} className="animate-step-in p-8">
             {step === 0 && <StepModules selected={modules} onChange={setModules} />}
             {step === 1 && <StepAccessibility value={accessibility} onChange={setAccessibility} />}
-            {step === 2 && <StepOrgName value={orgName} onChange={setOrgName} />}
+            {step === 2 && (
+              <StepOrgName
+                value={orgName}
+                onChange={(name) => { setOrgName(name); setOrgNameAvailable(false); }}
+                onAvailabilityChange={setOrgNameAvailable}
+              />
+            )}
             {step === 3 && <StepTeamSize value={teamSize} onChange={setTeamSize} />}
             {step === 4 && !session && (
               <StepAuth
