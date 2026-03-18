@@ -61,7 +61,7 @@ export function OnboardingWizard() {
       case 0: return modules.length > 0;
       case 1: return accessibility !== null;
       case 2: return orgNameAvailable;
-      case 3: return teamSize !== '';
+      case 3: return true; // team size is not required
       case 4: return true;
       default: return false;
     }
