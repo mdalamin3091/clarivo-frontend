@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { useSession, authClient } from '@/lib/auth-client';
-import { Button } from '@/components/ui/button';
 import { useOnboardingStore } from '../store';
 import { useSetupOrg } from '../hooks/useSetupOrg';
+import { useOnboardingNavigation } from '../hooks/useOnboardingNavigation';
+import { OnboardingProgress } from './OnboardingProgress';
+import { OnboardingNav } from './OnboardingNav';
 import { StepModules } from './StepModules';
 import { StepAccessibility } from './StepAccessibility';
 import { StepOrgName } from './StepOrgName';
@@ -14,77 +16,46 @@ import { StepTeamSize } from './StepTeamSize';
 import { StepAuth } from './StepAuth';
 import { Logo } from '@/shared/components/Logo';
 
-const STEP_LABELS = ['Modules', 'Access', 'Workspace', 'Team', 'Account'];
-
 export function OnboardingWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, isPending: sessionPending } = useSession();
 
   const {
-    step,
-    modules,
-    accessibility,
-    orgName,
-    teamSize,
-    setStep,
-    setModules,
-    setAccessibility,
-    setOrgName,
-    setTeamSize,
+    modules, accessibility, orgName, teamSize,
+    setModules, setAccessibility, setOrgName, setTeamSize,
     reset,
   } = useOnboardingStore();
 
   const [orgNameAvailable, setOrgNameAvailable] = useState(false);
-
   const isReturnFromOAuth = searchParams.get('complete') === '1';
 
   const setupOrgMutation = useSetupOrg({
     onSuccess: () => {
       reset();
-      // Notify better-auth atoms so the org list and active org in the sidebar
-      // update immediately when the dashboard mounts — no page refresh needed.
       authClient.$store.notify('$listOrg');
       authClient.$store.notify('$activeOrgSignal');
       router.push('/dashboard');
     },
   });
 
+  const triggerSetup = () =>
+    setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize });
+
   // After Google OAuth redirect, Zustand persist restores state from sessionStorage automatically
   useEffect(() => {
-    if (isReturnFromOAuth && session) {
-      setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize });
-    }
+    if (isReturnFromOAuth && session) triggerSetup();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReturnFromOAuth, session]);
 
-  const totalSteps = session ? 4 : 5;
+  const { step, totalSteps, isLastStep, isAuthStep, canProceed, handleNext, handleBack } =
+    useOnboardingNavigation({
+      isAuthenticated: !!session,
+      orgNameAvailable,
+      onSubmit: triggerSetup,
+    });
 
-  const canProceed = (): boolean => {
-    switch (step) {
-      case 0: return modules.length > 0;
-      case 1: return accessibility !== null;
-      case 2: return orgNameAvailable;
-      case 3: return true; // team size is not required
-      case 4: return true;
-      default: return false;
-    }
-  };
-
-  const handleNext = () => {
-    // Use >= so that if step overflows (e.g. step 4 persisted but session now exists,
-    // making totalSteps 4), the final "Create workspace" action still fires.
-    if (session && step >= totalSteps - 1) {
-      setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize });
-      return;
-    }
-    if (step < totalSteps - 1) setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    if (step > 0) setStep(step - 1);
-  };
-
+  // ── Loading states ───────────────────────────────────────────────────────
   if (sessionPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -93,10 +64,6 @@ export function OnboardingWizard() {
     );
   }
 
-  // Show setup loader while mutation is in-flight, or while we returned from email
-  // verification/OAuth and the session is present (waiting for the effect to fire the mutation).
-  // Stop showing once the mutation errors — let the wizard surface the error message.
-  // Also stop if session resolved to null (user not authenticated — show wizard to retry).
   const showSetupLoader =
     setupOrgMutation.isPending ||
     (isReturnFromOAuth && !setupOrgMutation.isError && !!session);
@@ -113,9 +80,7 @@ export function OnboardingWizard() {
     );
   }
 
-  const isAuthStep = !session && step === 4;
-  const isLastStep = step === totalSteps - 1;
-
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary/5 via-background to-muted/30 p-4">
       <div className="w-full max-w-lg">
@@ -124,39 +89,8 @@ export function OnboardingWizard() {
         </div>
 
         <div className="rounded-2xl border bg-card shadow-xl">
-          {/* Progress indicator */}
-          <div className="border-b px-8 py-5">
-            <div className="flex items-center justify-between">
-              {Array.from({ length: totalSteps }).map((_, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
-                      i < step
-                        ? 'bg-primary text-primary-foreground'
-                        : i === step
-                        
-                          ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
-                          : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {i < step ? '✓' : i + 1}
-                  </div>
-                  {i < totalSteps - 1 && (
-                    <div
-                      className={`h-0.5 w-8 transition-all duration-500 sm:w-12 ${
-                        i < step ? 'bg-primary' : 'bg-border'
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs font-medium text-muted-foreground">
-              Step {step + 1} of {totalSteps} — {STEP_LABELS[step]}
-            </p>
-          </div>
+          <OnboardingProgress step={step} totalSteps={totalSteps} />
 
-          {/* Step content */}
           <div key={step} className="animate-step-in p-8">
             {step === 0 && <StepModules selected={modules} onChange={setModules} />}
             {step === 1 && <StepAccessibility value={accessibility} onChange={setAccessibility} />}
@@ -168,55 +102,22 @@ export function OnboardingWizard() {
               />
             )}
             {step === 3 && <StepTeamSize value={teamSize} onChange={setTeamSize} />}
-            {step === 4 && !session && (
-              <StepAuth
-                onSuccess={() =>
-                  setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize })
-                }
-              />
-            )}
+            {step === 4 && !session && <StepAuth onSuccess={triggerSetup} />}
           </div>
 
-          {/* Navigation */}
           {!isAuthStep && (
-            <div className="flex items-center justify-between border-t px-8 py-5">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleBack}
-                disabled={step === 0}
-                className={step === 0 ? 'invisible' : ''}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </Button>
-
-              {setupOrgMutation.isError && (
-                <p className="text-xs text-destructive">
-                  {(setupOrgMutation.error as Error)?.message ?? 'Failed to create workspace'}
-                </p>
-              )}
-
-              <Button
-                type="button"
-                onClick={handleNext}
-                disabled={!canProceed() || setupOrgMutation.isPending}
-              >
-                {setupOrgMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isLastStep ? (
-                  <>
-                    {session ? 'Create workspace' : 'Continue'}
-                    <Sparkles className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    Continue
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
+            <OnboardingNav
+              step={step}
+              isLastStep={isLastStep}
+              isAuthenticated={!!session}
+              canProceed={canProceed()}
+              isPending={setupOrgMutation.isPending}
+              error={setupOrgMutation.isError
+                ? ((setupOrgMutation.error as Error)?.message ?? 'Failed to create workspace')
+                : null}
+              onBack={handleBack}
+              onNext={handleNext}
+            />
           )}
         </div>
 
@@ -230,7 +131,6 @@ export function OnboardingWizard() {
             Sign in
           </button>
         </p>
-
         <p className="mt-2 text-center text-xs text-muted-foreground">
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </p>

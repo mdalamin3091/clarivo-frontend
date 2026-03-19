@@ -1,42 +1,8 @@
 'use client';
 
-import { MessageSquare, BarChart2, BookOpen, ClipboardList, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const MODULES = [
-  {
-    id: 'feedback',
-    label: 'Feedback',
-    description: 'Collect and prioritize feature requests from users',
-    icon: MessageSquare,
-    color: 'text-blue-500',
-    bg: 'bg-blue-50 dark:bg-blue-950/40',
-  },
-  {
-    id: 'roadmap',
-    label: 'Roadmap',
-    description: 'Plan and communicate your product direction',
-    icon: BarChart2,
-    color: 'text-violet-500',
-    bg: 'bg-violet-50 dark:bg-violet-950/40',
-  },
-  {
-    id: 'changelog',
-    label: 'Changelog',
-    description: "Keep users informed about what's new",
-    icon: BookOpen,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-  },
-  {
-    id: 'survey',
-    label: 'Surveys',
-    description: 'Gather structured feedback with custom forms',
-    icon: ClipboardList,
-    color: 'text-orange-500',
-    bg: 'bg-orange-50 dark:bg-orange-950/40',
-  },
-];
+import { ONBOARDING_MODULES } from '../constants/modules';
 
 interface Props {
   selected: string[];
@@ -60,7 +26,7 @@ export function StepModules({ selected, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {MODULES.map(({ id, label, description, icon: Icon, color, bg }) => {
+        {ONBOARDING_MODULES.map(({ id, label, description, icon: Icon, color, bg }) => {
           const isSelected = selected.includes(id);
           return (
             <button
