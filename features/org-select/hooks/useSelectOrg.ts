@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { authClient } from '@/lib/auth-client';
+import { queryKeys } from '@/lib/query-keys';
 import { setActiveOrganization } from '../api';
 
 interface Result {
@@ -13,11 +15,13 @@ interface Result {
 }
 
 /**
- * Handles org selection: sets the active org, refreshes auth store atoms,
+ * Handles org selection: sets the active org, invalidates the workspace list
+ * cache so WorkspaceSwitcher shows fresh data immediately on dashboard mount,
  * and navigates to the dashboard on success.
  */
 export function useSelectOrg(): Result {
-  const router = useRouter();
+  const router      = useRouter();
+  const queryClient = useQueryClient();
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,8 +30,9 @@ export function useSelectOrg(): Result {
     setError(null);
     try {
       await setActiveOrganization(orgId);
-      // Refresh auth store so sidebar org display updates immediately
-      authClient.$store.notify('$listOrg');
+      // Invalidate TanStack Query cache so WorkspaceSwitcher re-fetches fresh list
+      await queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.list() });
+      // Refresh better-auth atoms for active org display
       authClient.$store.notify('$activeOrgSignal');
       router.push('/dashboard');
     } catch (err) {

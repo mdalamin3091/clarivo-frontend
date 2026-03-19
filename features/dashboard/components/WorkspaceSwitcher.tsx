@@ -3,13 +3,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ChevronDown, Loader2, Plus } from 'lucide-react';
-import { authClient, useListOrganizations, useActiveOrganization } from '@/lib/auth-client';
+import { useQueryClient } from '@tanstack/react-query';
+import { authClient, useActiveOrganization } from '@/lib/auth-client';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { queryKeys } from '@/lib/query-keys';
 import { orgColor } from '../utils/orgColor';
+import { useWorkspaceList } from '../hooks/useWorkspaceList';
 
 export function WorkspaceSwitcher() {
-  const router = useRouter();
-  const { data: orgs }      = useListOrganizations();
+  const router       = useRouter();
+  const queryClient  = useQueryClient();
+  const { data: orgs }      = useWorkspaceList();
   const { data: activeOrg } = useActiveOrganization();
 
   const [open,      setOpen]      = useState(false);
@@ -28,13 +32,14 @@ export function WorkspaceSwitcher() {
     if (orgId === activeOrg?.id) return;
     setSwitching(orgId);
     await authClient.organization.setActive({ organizationId: orgId });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.list() });
     setSwitching(null);
     setOpen(false);
   };
 
   const activeColor  = activeOrg ? orgColor(activeOrg.name) : 'bg-indigo-500';
   const activeLetter = activeOrg?.name.charAt(0).toUpperCase() ?? '?';
-
+  
   return (
     <div ref={ref} className="relative mb-2">
       <Tooltip>

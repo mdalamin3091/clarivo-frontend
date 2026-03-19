@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { signIn, useSession } from '@/lib/auth-client';
 import { useAuthForm } from '@/features/onboarding/hooks/useAuthForm';
+import { usePostSignInRedirect } from '../hooks/usePostSignInRedirect';
 import type { AuthFormValues } from '@/features/onboarding/validation/auth.schema';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -16,25 +17,23 @@ import { Logo } from '@/shared/components/Logo';
 export function SignInPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const { redirect } = usePostSignInRedirect();
   const [serverError, setServerError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const form = useAuthForm('signin');
   const { handleSubmit, formState: { isSubmitting } } = form;
 
-  // Already authenticated → go to org selection.
-  // Skip redirect if we just signed out — the session atom clears asynchronously
-  // after signOut resolves, so we'd see a stale session for a brief moment.
+  // Already authenticated → check org count and route accordingly.
+  // Skip if we just signed out — session atom clears async so we'd see a stale value.
   useEffect(() => {
     if (isPending || !session) return;
     if (sessionStorage.getItem('just-signed-out')) {
-      setTimeout(() => {
-        sessionStorage.removeItem("just-signed-out")
-      }, 100);
+      setTimeout(() => sessionStorage.removeItem('just-signed-out'), 100);
       return;
     }
-    router.replace('/org-select');
-  }, [session, isPending, router]);
+    redirect();
+  }, [session, isPending, redirect]);
 
   const onSubmit = async (values: AuthFormValues) => {
     setServerError('');
@@ -44,7 +43,7 @@ export function SignInPage() {
         password: values.password,
       });
       if (error) throw new Error(error.message ?? 'Sign in failed');
-      router.replace('/org-select');
+      await redirect();
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong');
     }
@@ -56,7 +55,7 @@ export function SignInPage() {
     try {
       await signIn.social({
         provider: 'google',
-        callbackURL: `${window.location.origin}/org-select`,
+        callbackURL: `${window.location.origin}/auth/callback`,
       });
     } catch {
       setServerError('Google sign-in failed. Please try again.');

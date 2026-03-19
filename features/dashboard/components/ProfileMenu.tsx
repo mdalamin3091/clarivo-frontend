@@ -29,7 +29,6 @@ export function ProfileMenu() {
     // see the stale in-memory session and redirect back to /org-select.
     sessionStorage.setItem('just-signed-out', '1');
     router.replace('/signin');
-    
   };
 
   const initial = session?.user.name?.charAt(0).toUpperCase() ?? '?';

@@ -3,6 +3,9 @@
  * Every feature reads keys from here — no inline key arrays anywhere else.
  */
 export const queryKeys = {
+  workspaces: {
+    list: () => ['workspaces', 'list'] as const,
+  },
   organizations: {
     checkName: (name: string) => ['organizations', 'check-name', name] as const,
     active:    (orgId: string) => ['organizations', orgId] as const,
