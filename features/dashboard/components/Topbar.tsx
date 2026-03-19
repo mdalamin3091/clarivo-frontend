@@ -4,31 +4,13 @@ import { usePathname } from 'next/navigation';
 import { PanelLeft } from 'lucide-react';
 import { useUIStore } from '@/store/ui';
 import { ThemeToggle } from '@/shared/components/ui/ThemeToggle';
-
-const PAGE_TITLES: Record<string, string> = {
-  '/dashboard': 'Overview',
-  '/dashboard/feedback': 'Feedback',
-  '/dashboard/roadmap': 'Roadmap',
-  '/dashboard/changelog': 'Changelog',
-  '/dashboard/surveys': 'Surveys',
-  '/dashboard/members': 'Members',
-  '/dashboard/settings': 'Settings',
-};
-
-// Routes that have a dynamic second sidebar panel
-const PANEL_ROUTES = [
-  '/dashboard/feedback',
-  '/dashboard/roadmap',
-  '/dashboard/changelog',
-  '/dashboard/surveys',
-  '/dashboard/settings',
-];
+import { PAGE_TITLES, PANEL_ROUTES } from '../constants/navigation';
 
 export function Topbar() {
   const pathname = usePathname();
   const { toggleSidebar } = useUIStore();
 
-  const title = PAGE_TITLES[pathname] ?? 'Dashboard';
+  const title    = PAGE_TITLES[pathname] ?? 'Dashboard';
   const hasPanel = PANEL_ROUTES.some((r) => pathname.startsWith(r));
 
   return (

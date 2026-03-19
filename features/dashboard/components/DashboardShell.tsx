@@ -1,22 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { useSession } from '@/lib/auth-client';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { DashboardHome } from './DashboardHome';
+import { useAuthGuard } from '../hooks/useAuthGuard';
 
 export function DashboardShell({ children }: { children?: React.ReactNode }) {
-  const router = useRouter();
-  const { data: session, isPending } = useSession();
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      router.replace('/signin');
-    }
-  }, [session, isPending, router]);
+  const { session, isPending } = useAuthGuard();
 
   if (isPending) {
     return (
