@@ -31,7 +31,9 @@ export function OnboardingWizard() {
   const isReturnFromOAuth = searchParams.get('complete') === '1';
 
   const setupOrgMutation = useSetupOrg({
-    onSuccess: () => {
+    onSuccess: async (org) => {
+      // Explicitly activate the newly created org so the session reflects it
+      await authClient.organization.setActive({ organizationId: org.organization.id });
       reset();
       authClient.$store.notify('$listOrg');
       authClient.$store.notify('$activeOrgSignal');

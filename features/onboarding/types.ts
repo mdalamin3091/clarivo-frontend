@@ -4,3 +4,15 @@ export interface OnboardingData {
   orgName: string;
   teamSize: string;
 }
+
+export interface CreatedOrganization {
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    modules: string[];
+    accessibility: string;
+    teamSize: string | null;
+    createdAt: string;
+  };
+}

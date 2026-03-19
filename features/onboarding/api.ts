@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api';
-import type { OnboardingData } from './types';
+import type { OnboardingData, CreatedOrganization } from './types';
 
 export async function checkOrgName(name: string): Promise<{ available: boolean }> {
   return apiFetch<{ available: boolean }>(
@@ -9,8 +9,8 @@ export async function checkOrgName(name: string): Promise<{ available: boolean }
 
 export async function setupOrganization(
   data: Pick<OnboardingData, 'modules' | 'accessibility' | 'teamSize'> & { name: string },
-): Promise<void> {
-  await apiFetch('/api/v1/organizations/setup', {
+): Promise<CreatedOrganization> {
+  return apiFetch<CreatedOrganization>('/api/v1/organizations/setup', {
     method: 'POST',
     body: JSON.stringify(data),
   });
