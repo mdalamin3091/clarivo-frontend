@@ -22,11 +22,18 @@ export function SignInPage() {
   const form = useAuthForm('signin');
   const { handleSubmit, formState: { isSubmitting } } = form;
 
-  // Already authenticated → go to org selection
+  // Already authenticated → go to org selection.
+  // Skip redirect if we just signed out — the session atom clears asynchronously
+  // after signOut resolves, so we'd see a stale session for a brief moment.
   useEffect(() => {
-    if (!isPending && session) {
-      router.replace('/org-select');
+    if (isPending || !session) return;
+    if (sessionStorage.getItem('just-signed-out')) {
+      setTimeout(() => {
+        sessionStorage.removeItem("just-signed-out")
+      }, 100);
+      return;
     }
+    router.replace('/org-select');
   }, [session, isPending, router]);
 
   const onSubmit = async (values: AuthFormValues) => {

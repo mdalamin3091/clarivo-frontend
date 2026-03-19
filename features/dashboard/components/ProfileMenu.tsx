@@ -23,7 +23,13 @@ export function ProfileMenu() {
 
   const handleSignOut = async () => {
     await signOut();
+    // Flag sign-out so the sign-in page skips its auto-redirect.
+    // The better-auth session atom clears asynchronously (10ms setTimeout
+    // after signOut resolves), so without this flag the sign-in page would
+    // see the stale in-memory session and redirect back to /org-select.
+    sessionStorage.setItem('just-signed-out', '1');
     router.replace('/signin');
+    
   };
 
   const initial = session?.user.name?.charAt(0).toUpperCase() ?? '?';
