@@ -1,19 +1,13 @@
 'use client';
 
-import { Users, UserPlus, Crown, Shield, User } from 'lucide-react';
+import { UserPlus, Users } from 'lucide-react';
 import { useSession, useActiveOrganization } from '@/lib/auth-client';
-
-const ROLE_BADGE: Record<string, { label: string; icon: typeof Crown; class: string }> = {
-  owner:  { label: 'Owner',  icon: Crown,  class: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400' },
-  admin:  { label: 'Admin',  icon: Shield, class: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400' },
-  member: { label: 'Member', icon: User,   class: 'bg-muted text-muted-foreground' },
-};
+import { MemberRow } from './MemberRow';
 
 export function SettingsMembersPage() {
   const { data: session } = useSession();
   const { data: org }     = useActiveOrganization();
-
-  const members = org?.members ?? [];
+  const members           = org?.members ?? [];
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -31,7 +25,6 @@ export function SettingsMembersPage() {
       </div>
 
       <div className="rounded-xl border bg-card">
-        {/* Table header */}
         <div className="grid grid-cols-[1fr_100px_80px] gap-4 border-b px-4 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           <span>Member</span>
           <span>Role</span>
@@ -40,40 +33,9 @@ export function SettingsMembersPage() {
 
         {members.length > 0 ? (
           <ul>
-            {members.map((m) => {
-              const role   = (m.role ?? 'member') as keyof typeof ROLE_BADGE;
-              const badge  = ROLE_BADGE[role] ?? ROLE_BADGE.member;
-              const Icon   = badge.icon;
-              const isMe   = m.userId === session?.user.id;
-              const initial = m.user?.name?.charAt(0).toUpperCase() ?? '?';
-              return (
-                <li key={m.id} className="grid grid-cols-[1fr_100px_80px] items-center gap-4 border-b px-4 py-3 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                      {initial}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {m.user?.name ?? 'Unknown'}
-                        {isMe && <span className="ml-1.5 text-xs text-muted-foreground">(you)</span>}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{m.user?.email}</p>
-                    </div>
-                  </div>
-                  <span className={`inline-flex w-fit items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${badge.class}`}>
-                    <Icon className="h-3 w-3" />
-                    {badge.label}
-                  </span>
-                  <div className="flex justify-end">
-                    {!isMe && (
-                      <button className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
+            {members.map((m) => (
+              <MemberRow key={m.id} member={m} currentUserId={session?.user.id} />
+            ))}
           </ul>
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">

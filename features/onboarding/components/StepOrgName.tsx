@@ -1,22 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { checkOrgName } from '../api';
-import { queryKeys } from '@/lib/query-keys';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
-}
+import { useCheckOrgName } from '../hooks/useCheckOrgName';
 
 interface Props {
   value: string;
@@ -25,22 +13,7 @@ interface Props {
 }
 
 export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
-  const debouncedName = useDebounce(value.trim(), 600);
-
-  const { data, isFetching, isError } = useQuery({
-    queryKey: queryKeys.organizations.checkName(debouncedName),
-    queryFn: () => checkOrgName(debouncedName),
-    enabled: debouncedName.length >= 2,
-    staleTime: 10_000,
-  });
-
-  const isChecking = isFetching || (debouncedName !== value.trim() && value.trim().length >= 2);
-  const isAvailable = !isChecking && data?.available === true && !isError;
-  const isTaken = !isChecking && data?.available === false;
-
-  useEffect(() => {
-    onAvailabilityChange(isAvailable);
-  }, [isAvailable, onAvailabilityChange]);
+  const { isChecking, isAvailable, isTaken } = useCheckOrgName(value, onAvailabilityChange);
 
   return (
     <div className="space-y-6">
@@ -97,7 +70,6 @@ export function StepOrgName({ value, onChange, onAvailabilityChange }: Props) {
             >
               {isAvailable && `"${value.trim()}" is available`}
               {isTaken && `"${value.trim()}" is already taken`}
-              {isError && 'Could not check availability'}
             </p>
           )}
         </div>

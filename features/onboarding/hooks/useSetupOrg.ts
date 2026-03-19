@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { setupOrganization } from '../api';
-import type { OnboardingData } from '../types';
+import type { OnboardingData, CreatedOrganization } from '../types';
 
 interface Options {
-  onSuccess?: () => void;
+  onSuccess?: (result: CreatedOrganization) => void;
   onError?: (error: Error) => void;
 }
 

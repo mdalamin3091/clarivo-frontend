@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* ─── Tailwind v4: class-based dark mode ───────────────────────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -104,6 +105,7 @@
   to { opacity: 1; }
 }
 
+
 .animate-step-in {
   animation: step-in 0.22s ease-out both;
 }
@@ -111,6 +113,7 @@
 .animate-fade-in {
   animation: fade-in 0.15s ease-out both;
 }
+
 
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
