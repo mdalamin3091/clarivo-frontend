@@ -17,6 +17,7 @@ import {
 import { signOut, useSession } from '@/lib/auth-client';
 import { useUIStore } from '@/store/ui';
 import { Logo } from '@/shared/components/Logo';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 const MAIN_NAV = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -76,7 +77,7 @@ export function Sidebar() {
     >
       {/* ── Logo + collapse toggle ── */}
       <div
-        className={`flex h-16 shrink-0 items-center border-b px-4 ${
+        className={`flex h-14 shrink-0 items-center border-b px-4 ${
           sidebarOpen ? 'justify-between' : 'justify-center'
         }`}
       >
@@ -90,6 +91,11 @@ export function Sidebar() {
             className={`h-4 w-4 transition-transform duration-200 ${!sidebarOpen ? 'rotate-180' : ''}`}
           />
         </button>
+      </div>
+
+      {/* ── Workspace switcher ── */}
+      <div className="shrink-0 border-b">
+        <WorkspaceSwitcher collapsed={!sidebarOpen} />
       </div>
 
       {/* ── Main navigation ── */}

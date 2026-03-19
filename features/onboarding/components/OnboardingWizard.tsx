@@ -113,7 +113,7 @@ export function OnboardingWizard() {
   const isLastStep = step === totalSteps - 1;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-muted/30 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary/5 via-background to-muted/30 p-4">
       <div className="w-full max-w-lg">
         <div className="mb-8 flex justify-center">
           <Logo size="md" />
@@ -130,6 +130,7 @@ export function OnboardingWizard() {
                       i < step
                         ? 'bg-primary text-primary-foreground'
                         : i === step
+                        
                           ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
                           : 'bg-muted text-muted-foreground'
                     }`}
