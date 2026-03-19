@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ export function OrgSelectPage() {
   const router = useRouter();
   const { data: orgs, isPending } = useOrgList();
   const { select, selectingId, error } = useSelectOrg();
+  const autoSelected = useRef(false);
 
   // No orgs → send to onboarding
   useEffect(() => {
@@ -21,7 +22,16 @@ export function OrgSelectPage() {
     }
   }, [isPending, orgs, router]);
 
-  if (isPending || (orgs && orgs.length === 0)) {
+  // Single org → auto-select, skip the picker
+  useEffect(() => {
+    if (!isPending && orgs && orgs.length === 1 && !autoSelected.current) {
+      autoSelected.current = true;
+      select(orgs[0].id);
+    }
+  }, [isPending, orgs, select]);
+
+  // Show spinner while loading, redirecting, or auto-selecting
+  if (isPending || (orgs && orgs.length <= 1)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
