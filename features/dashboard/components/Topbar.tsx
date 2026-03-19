@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Bell, Menu } from 'lucide-react';
 import { useUIStore } from '@/store/ui';
+import { ThemeToggle } from '@/shared/components/ui/ThemeToggle';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Overview',
@@ -21,7 +22,7 @@ export function Topbar() {
   const title = PAGE_TITLES[pathname] ?? 'Dashboard';
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-5">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-5">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger — hidden on lg since sidebar handles it */}
         <button
@@ -34,6 +35,7 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-1">
+        <ThemeToggle />
         <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
           <Bell className="h-4 w-4" />
         </button>

@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-/* ─── shadcn CSS variable tokens ──────────────────────────────────────────── */
+/* ─── Tailwind v4: class-based dark mode ───────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Light mode tokens ────────────────────────────────────────────────────── */
 @layer base {
   :root {
     --background: #ffffff;
@@ -26,28 +29,28 @@
     --success: #22c55e;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: #09090b;
-      --foreground: #fafafa;
-      --card: #18181b;
-      --card-foreground: #fafafa;
-      --popover: #18181b;
-      --popover-foreground: #fafafa;
-      --primary: #4f46e5;
-      --primary-foreground: #ffffff;
-      --secondary: #27272a;
-      --secondary-foreground: #fafafa;
-      --muted: #27272a;
-      --muted-foreground: #a1a1aa;
-      --accent: #27272a;
-      --accent-foreground: #fafafa;
-      --destructive: #ef4444;
-      --destructive-foreground: #ffffff;
-      --border: #27272a;
-      --input: #27272a;
-      --ring: #4f46e5;
-    }
+  /* ─── Dark mode tokens ──────────────────────────────────────────────────── */
+  .dark {
+    --background: #0c0c0f;
+    --foreground: #f4f4f5;
+    --card: #131317;
+    --card-foreground: #f4f4f5;
+    --popover: #1a1a1f;
+    --popover-foreground: #f4f4f5;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #1e1e26;
+    --secondary-foreground: #f4f4f5;
+    --muted: #1e1e26;
+    --muted-foreground: #8b8b9e;
+    --accent: #242430;
+    --accent-foreground: #f4f4f5;
+    --destructive: #f87171;
+    --destructive-foreground: #ffffff;
+    --border: #2a2a38;
+    --input: #242430;
+    --ring: #6366f1;
+    --success: #4ade80;
   }
 }
 
@@ -76,7 +79,6 @@
   --color-ring: var(--ring);
   --color-success: var(--success);
 
-  /* Keep legacy aliases used in components */
   --color-primary-hover: #4338ca;
   --color-primary-light: #eef2ff;
 

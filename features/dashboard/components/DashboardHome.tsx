@@ -18,8 +18,8 @@ const STATS = [
     sub: 'No posts yet',
     icon: MessageSquare,
     href: '/dashboard/feedback',
-    iconClass: 'bg-blue-50 text-blue-600',
-    ringClass: 'hover:ring-blue-200',
+    iconClass: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+    ringClass: 'hover:ring-blue-200 dark:hover:ring-blue-900',
   },
   {
     label: 'Roadmap Items',
@@ -27,8 +27,8 @@ const STATS = [
     sub: 'No items yet',
     icon: Map,
     href: '/dashboard/roadmap',
-    iconClass: 'bg-violet-50 text-violet-600',
-    ringClass: 'hover:ring-violet-200',
+    iconClass: 'bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-400',
+    ringClass: 'hover:ring-violet-200 dark:hover:ring-violet-900',
   },
   {
     label: 'Changelog Posts',
@@ -36,8 +36,8 @@ const STATS = [
     sub: 'No posts yet',
     icon: Newspaper,
     href: '/dashboard/changelog',
-    iconClass: 'bg-emerald-50 text-emerald-600',
-    ringClass: 'hover:ring-emerald-200',
+    iconClass: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
+    ringClass: 'hover:ring-emerald-200 dark:hover:ring-emerald-900',
   },
   {
     label: 'Active Surveys',
@@ -45,8 +45,8 @@ const STATS = [
     sub: 'No surveys yet',
     icon: ClipboardList,
     href: '/dashboard/surveys',
-    iconClass: 'bg-orange-50 text-orange-600',
-    ringClass: 'hover:ring-orange-200',
+    iconClass: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400',
+    ringClass: 'hover:ring-orange-200 dark:hover:ring-orange-900',
   },
 ];
 
@@ -56,28 +56,28 @@ const QUICK_ACTIONS = [
     desc: 'Create a feedback board and let users vote on ideas.',
     icon: MessageSquare,
     href: '/dashboard/feedback',
-    iconClass: 'bg-blue-50 text-blue-600',
+    iconClass: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
   },
   {
     label: 'Plan your Roadmap',
     desc: 'Share what you\'re building and keep users in the loop.',
     icon: Map,
     href: '/dashboard/roadmap',
-    iconClass: 'bg-violet-50 text-violet-600',
+    iconClass: 'bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-400',
   },
   {
     label: 'Post a Changelog',
     desc: 'Announce new features, fixes, and improvements.',
     icon: Newspaper,
     href: '/dashboard/changelog',
-    iconClass: 'bg-emerald-50 text-emerald-600',
+    iconClass: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
   },
   {
     label: 'Run a Survey',
     desc: 'Get structured, actionable feedback from your users.',
     icon: ClipboardList,
     href: '/dashboard/surveys',
-    iconClass: 'bg-orange-50 text-orange-600',
+    iconClass: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400',
   },
 ];
 
