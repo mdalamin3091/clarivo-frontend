@@ -8,48 +8,72 @@ import {
   Map,
   Newspaper,
   ClipboardList,
-  Users,
+  Bell,
+  BarChart2,
   Settings,
-  ChevronLeft,
   LogOut,
-  ChevronsUpDown,
+  Check,
+  Loader2,
+  Plus,
+  HelpCircle,
+  Code2,
 } from 'lucide-react';
-import { signOut, useSession } from '@/lib/auth-client';
+import {
+  authClient,
+  signOut,
+  useSession,
+  useListOrganizations,
+  useActiveOrganization,
+} from '@/lib/auth-client';
 import { useUIStore } from '@/store/ui';
-import { Logo } from '@/shared/components/Logo';
-import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
-const MAIN_NAV = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },
-  { label: 'Roadmap', href: '/dashboard/roadmap', icon: Map },
-  { label: 'Changelog', href: '/dashboard/changelog', icon: Newspaper },
-  { label: 'Surveys', href: '/dashboard/surveys', icon: ClipboardList },
+// ── Org avatar colour (deterministic by name) ──────────────────────────────
+const ORG_COLORS = [
+  'bg-indigo-500', 'bg-violet-500', 'bg-blue-500', 'bg-emerald-500',
+  'bg-orange-500', 'bg-rose-500',   'bg-teal-500', 'bg-amber-500',
+];
+function orgColor(name: string): string {
+  const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return ORG_COLORS[hash % ORG_COLORS.length];
+}
+
+// ── Navigation config ──────────────────────────────────────────────────────
+const MODULE_ICONS = [
+  { label: 'Dashboard',  href: '/dashboard',            icon: LayoutDashboard, exact: true },
+  { label: 'Feedback',   href: '/dashboard/feedback',   icon: MessageSquare },
+  { label: 'Roadmap',    href: '/dashboard/roadmap',    icon: Map },
+  { label: 'Changelog',  href: '/dashboard/changelog',  icon: Newspaper },
+  { label: 'Surveys',    href: '/dashboard/surveys',    icon: ClipboardList },
 ];
 
-const WORKSPACE_NAV = [
-  { label: 'Members', href: '/dashboard/members', icon: Users },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+const BOTTOM_ICONS = [
+  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
+  { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2 },
+  { label: 'Settings',      href: '/dashboard/settings',      icon: Settings },
 ];
 
+// ── Component ──────────────────────────────────────────────────────────────
 export function Sidebar() {
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
-  const { sidebarOpen, toggleSidebar } = useUIStore();
-  const { data: session } = useSession();
+  const { sidebarOpen } = useUIStore();
 
+  const { data: session }   = useSession();
+  const { data: orgs }      = useListOrganizations();
+  const { data: activeOrg } = useActiveOrganization();
+
+  const [switching,   setSwitching]   = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close profile dropdown on outside click
+  // Close profile popup on outside click
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+    function onOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node))
         setProfileOpen(false);
-      }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
   }, []);
 
   const handleSignOut = async () => {
@@ -57,144 +81,187 @@ export function Sidebar() {
     router.replace('/onboarding');
   };
 
-  const isActive = (href: string) =>
-    href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
+  const handleSwitch = async (orgId: string) => {
+    if (orgId === activeOrg?.id) return;
+    setSwitching(orgId);
+    await authClient.organization.setActive({ organizationId: orgId });
+    setSwitching(null);
+  };
 
-  const navItemClass = (href: string) =>
-    `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-      isActive(href)
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href);
+
+  const userInitial     = session?.user.name?.charAt(0).toUpperCase() ?? '?';
+  const activeOrgColor  = activeOrg ? orgColor(activeOrg.name) : 'bg-indigo-500';
+  const activeOrgLetter = activeOrg?.name.charAt(0).toUpperCase() ?? '?';
+
+  // ── icon rail button style helper
+  const railBtn = (href: string, exact?: boolean) =>
+    `flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+      isActive(href, exact)
         ? 'bg-primary/10 text-primary'
-        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-    } ${!sidebarOpen ? 'justify-center px-0' : ''}`;
-
-  const initial = session?.user.name?.charAt(0).toUpperCase() ?? '?';
+        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+    }`;
 
   return (
-    <aside
-      className={`relative flex h-screen flex-col border-r bg-card transition-[width] duration-200 ${
-        sidebarOpen ? 'w-64' : 'w-16'
-      }`}
-    >
-      {/* ── Logo + collapse toggle ── */}
-      <div
-        className={`flex h-14 shrink-0 items-center border-b px-4 ${
-          sidebarOpen ? 'justify-between' : 'justify-center'
-        }`}
-      >
-        {sidebarOpen && <Logo size="sm" />}
-        <button
-          onClick={toggleSidebar}
-          title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+    <aside className="flex h-screen shrink-0">
+
+      {/* ════════════════════════════════════
+          COLUMN 1 — Icon Rail (48 px)
+      ════════════════════════════════════ */}
+      <div className="flex w-12 flex-col items-center border-r bg-card py-3 gap-0.5">
+
+        {/* Active workspace badge */}
+        <div
+          title={activeOrg?.name ?? 'Workspace'}
+          className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-bold text-white ${activeOrgColor}`}
         >
-          <ChevronLeft
-            className={`h-4 w-4 transition-transform duration-200 ${!sidebarOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
-      </div>
-
-      {/* ── Workspace switcher ── */}
-      <div className="shrink-0 border-b">
-        <WorkspaceSwitcher collapsed={!sidebarOpen} />
-      </div>
-
-      {/* ── Main navigation ── */}
-      <nav className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-0.5">
-          {MAIN_NAV.map(({ label, href, icon: Icon }) => (
-            <li key={href}>
-              <button
-                onClick={() => router.push(href)}
-                title={!sidebarOpen ? label : undefined}
-                className={navItemClass(href)}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {sidebarOpen && <span>{label}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        {/* Workspace section */}
-        <div className="mt-4">
-          {sidebarOpen ? (
-            <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-              Workspace
-            </p>
-          ) : (
-            <div className="my-3 border-t" />
-          )}
-          <ul className="space-y-0.5">
-            {WORKSPACE_NAV.map(({ label, href, icon: Icon }) => (
-              <li key={href}>
-                <button
-                  onClick={() => router.push(href)}
-                  title={!sidebarOpen ? label : undefined}
-                  className={navItemClass(href)}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  {sidebarOpen && <span>{label}</span>}
-                </button>
-              </li>
-            ))}
-          </ul>
+          {activeOrgLetter}
         </div>
-      </nav>
 
-      {/* ── Profile section ── */}
-      <div className="shrink-0 border-t p-2" ref={profileRef}>
-        <div className="relative">
-          <button
-            onClick={() => setProfileOpen((o) => !o)}
-            title={!sidebarOpen ? (session?.user.name ?? 'Profile') : undefined}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent ${
-              !sidebarOpen ? 'justify-center px-0' : ''
-            }`}
-          >
-            {/* Avatar */}
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-              {initial}
-            </div>
-            {sidebarOpen && (
-              <>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {session?.user.name}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {session?.user.email}
-                  </p>
-                </div>
-                <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              </>
-            )}
-          </button>
-
-          {/* Dropdown */}
-          {profileOpen && (
-            <div
-              className={`absolute bottom-full mb-1 rounded-xl border bg-popover shadow-lg ${
-                sidebarOpen ? 'left-0 w-full' : 'left-full ml-2 w-52'
-              }`}
+        {/* Module nav icons */}
+        <div className="flex flex-1 flex-col items-center gap-0.5 pt-1">
+          {MODULE_ICONS.map(({ label, href, icon: Icon, exact }) => (
+            <button
+              key={href}
+              onClick={() => router.push(href)}
+              title={label}
+              className={railBtn(href, exact)}
             >
-              {/* User info header */}
-              <div className="border-b px-3 py-2.5">
-                <p className="text-sm font-semibold text-foreground">{session?.user.name}</p>
-                <p className="text-xs text-muted-foreground">{session?.user.email}</p>
+              <Icon className="h-4 w-4" />
+            </button>
+          ))}
+        </div>
+
+        {/* Bottom icons */}
+        <div className="flex flex-col items-center gap-0.5">
+          {BOTTOM_ICONS.map(({ label, href, icon: Icon }) => (
+            <button
+              key={href}
+              onClick={() => router.push(href)}
+              title={label}
+              className={railBtn(href)}
+            >
+              <Icon className="h-4 w-4" />
+            </button>
+          ))}
+
+          {/* User avatar + profile popup */}
+          <div ref={profileRef} className="relative mt-1">
+            <button
+              onClick={() => setProfileOpen((o) => !o)}
+              title={session?.user.name ?? 'Profile'}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary transition-colors hover:bg-primary/20"
+            >
+              {userInitial}
+            </button>
+
+            {profileOpen && (
+              <div className="absolute bottom-0 left-full ml-3 w-56 rounded-xl border bg-popover shadow-xl">
+                <div className="border-b px-3 py-3">
+                  <p className="text-sm font-semibold text-foreground">{session?.user.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">{session?.user.email}</p>
+                </div>
+                <div className="p-1">
+                  <button
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Sign out
+                  </button>
+                </div>
               </div>
-              <div className="p-1">
-                <button
-                  onClick={handleSignOut}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  Sign out
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {/* ════════════════════════════════════
+          COLUMN 2 — Org Panel (208 px)
+          Hidden when sidebar is collapsed
+      ════════════════════════════════════ */}
+      {sidebarOpen && (
+        <div className="flex w-52 flex-col border-r bg-card">
+
+          {/* Panel header */}
+          <div className="flex h-16 shrink-0 items-center border-b px-4">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Your organizations
+            </span>
+          </div>
+
+          {/* Org list */}
+          <div className="flex-1 overflow-y-auto px-2 py-2">
+            {orgs && orgs.length > 0 ? (
+              <ul className="space-y-0.5">
+                {orgs.map((org) => {
+                  const active     = org.id === activeOrg?.id;
+                  const isSwitching = switching === org.id;
+                  return (
+                    <li key={org.id}>
+                      <button
+                        onClick={() => handleSwitch(org.id)}
+                        disabled={isSwitching}
+                        className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors disabled:opacity-50 ${
+                          active
+                            ? 'bg-accent font-medium text-foreground'
+                            : 'text-foreground/80 hover:bg-accent hover:text-foreground'
+                        }`}
+                      >
+                        {/* Org avatar */}
+                        <div
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white ${orgColor(org.name)}`}
+                        >
+                          {isSwitching
+                            ? <Loader2 className="h-3 w-3 animate-spin" />
+                            : org.name.charAt(0).toUpperCase()
+                          }
+                        </div>
+
+                        <span className="flex-1 truncate">{org.name}</span>
+
+                        {active && !isSwitching && (
+                          <Check className="h-3 w-3 shrink-0 text-primary" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="px-2 py-2 text-xs text-muted-foreground">No organizations yet.</p>
+            )}
+
+            {/* Create new workspace */}
+            <button
+              onClick={() => router.push('/onboarding')}
+              className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-dashed border-border">
+                <Plus className="h-3 w-3" />
+              </div>
+              Create workspace
+            </button>
+          </div>
+
+          {/* Resources footer */}
+          <div className="shrink-0 border-t px-2 py-2">
+            <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
+              Resources
+            </p>
+            <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+              <Code2 className="h-3.5 w-3.5 shrink-0" />
+              Install Widget &amp; Embed
+            </button>
+            <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+              <HelpCircle className="h-3.5 w-3.5 shrink-0" />
+              Help Center
+            </button>
+          </div>
+
+        </div>
+      )}
     </aside>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
-import { useSession } from '@/lib/auth-client';
+import { useSession, authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { useOnboardingStore } from '../store';
 import { useSetupOrg } from '../hooks/useSetupOrg';
@@ -42,6 +42,10 @@ export function OnboardingWizard() {
   const setupOrgMutation = useSetupOrg({
     onSuccess: () => {
       reset();
+      // Notify better-auth atoms so the org list and active org in the sidebar
+      // update immediately when the dashboard mounts — no page refresh needed.
+      authClient.$store.notify('$listOrg');
+      authClient.$store.notify('$activeOrgSignal');
       router.push('/dashboard');
     },
   });
