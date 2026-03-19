@@ -35,13 +35,15 @@ export function StepAuth({ onSuccess }: Props) {
           password: values.password,
         });
         if (error) throw new Error(error.message ?? 'Sign up failed');
-      } else {
-        const { error } = await signIn.email({
-          email: values.email,
-          password: values.password,
-        });
-        if (error) throw new Error(error.message ?? 'Sign in failed');
+        onSuccess();
+        return;
       }
+
+      const { error } = await signIn.email({
+        email: values.email,
+        password: values.password,
+      });
+      if (error) throw new Error(error.message ?? 'Sign in failed');
       onSuccess();
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong');

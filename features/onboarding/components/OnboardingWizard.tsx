@@ -68,7 +68,9 @@ export function OnboardingWizard() {
   };
 
   const handleNext = () => {
-    if (session && step === totalSteps - 1) {
+    // Use >= so that if step overflows (e.g. step 4 persisted but session now exists,
+    // making totalSteps 4), the final "Create workspace" action still fires.
+    if (session && step >= totalSteps - 1) {
       setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize });
       return;
     }
@@ -87,7 +89,15 @@ export function OnboardingWizard() {
     );
   }
 
-  if (setupOrgMutation.isPending || isReturnFromOAuth) {
+  // Show setup loader while mutation is in-flight, or while we returned from email
+  // verification/OAuth and the session is present (waiting for the effect to fire the mutation).
+  // Stop showing once the mutation errors — let the wizard surface the error message.
+  // Also stop if session resolved to null (user not authenticated — show wizard to retry).
+  const showSetupLoader =
+    setupOrgMutation.isPending ||
+    (isReturnFromOAuth && !setupOrgMutation.isError && !!session);
+
+  if (showSetupLoader) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
