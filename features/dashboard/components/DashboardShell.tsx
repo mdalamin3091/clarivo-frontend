@@ -14,7 +14,7 @@ export function DashboardShell({ children }: { children?: React.ReactNode }) {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.replace('/onboarding');
+      router.replace('/signin');
     }
   }, [session, isPending, router]);
 

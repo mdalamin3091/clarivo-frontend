@@ -220,7 +220,18 @@ export function OnboardingWizard() {
           )}
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => router.push('/signin')}
+            className="font-semibold text-primary hover:text-primary/80"
+          >
+            Sign in
+          </button>
+        </p>
+
+        <p className="mt-2 text-center text-xs text-muted-foreground">
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </p>
       </div>

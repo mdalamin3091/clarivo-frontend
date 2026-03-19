@@ -190,7 +190,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace('/onboarding');
+    router.replace('/signin');
   };
 
   const handleSwitch = async (orgId: string) => {
