@@ -55,21 +55,23 @@ export function OrgSelectPage() {
             </p>
           </div>
 
-          <div className="space-y-2 px-8 py-6">
-            {orgs?.map((org) => (
-              <OrgCard
-                key={org.id}
-                org={org}
-                isSelecting={selectingId === org.id}
-                onSelect={() => select(org.id)}
-              />
-            ))}
+          <div className="max-h-84 overflow-y-auto px-8 py-6">
+            <div className="space-y-2">
+              {orgs?.map((org) => (
+                <OrgCard
+                  key={org.id}
+                  org={org}
+                  isSelecting={selectingId === org.id}
+                  onSelect={() => select(org.id)}
+                />
+              ))}
 
-            {error && (
-              <p className="animate-fade-in rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {error}
-              </p>
-            )}
+              {error && (
+                <p className="animate-fade-in rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="border-t px-8 py-5">
