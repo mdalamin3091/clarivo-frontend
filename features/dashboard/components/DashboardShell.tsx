@@ -8,7 +8,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { DashboardHome } from './DashboardHome';
 
-export function DashboardShell() {
+export function DashboardShell({ children }: { children?: React.ReactNode }) {
   const router = useRouter();
   const { data: session, isPending } = useSession();
 
@@ -34,7 +34,7 @@ export function DashboardShell() {
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
         <main className="flex-1 overflow-y-auto">
-          <DashboardHome />
+          {children ?? <DashboardHome />}
         </main>
       </div>
     </div>

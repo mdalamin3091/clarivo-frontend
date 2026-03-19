@@ -18,6 +18,7 @@ import {
   ChevronDown,
   HelpCircle,
   Code2,
+  Circle,
 } from 'lucide-react';
 import {
   authClient,
@@ -52,6 +53,107 @@ const BOTTOM_ICONS = [
   { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2 },
   { label: 'Settings',      href: '/dashboard/settings',      icon: Settings },
 ];
+
+// ── Dynamic second-sidebar panel config ───────────────────────────────────
+type PanelItem    = { label: string; href: string; color?: string };
+type PanelSection = { title: string; items: PanelItem[] };
+type PanelConfig  = { heading: string; sections: PanelSection[] };
+
+const PANEL_CONFIG: Record<string, PanelConfig> = {
+  '/dashboard/feedback': {
+    heading: 'Feedback',
+    sections: [
+      {
+        title: 'Status',
+        items: [
+          { label: 'In Review', href: '/dashboard/feedback?status=in-review', color: 'bg-yellow-400' },
+          { label: 'Active',    href: '/dashboard/feedback?status=active',    color: 'bg-green-400'  },
+          { label: 'Closed',   href: '/dashboard/feedback?status=closed',   color: 'bg-red-400'    },
+          { label: 'Done',     href: '/dashboard/feedback?status=done',     color: 'bg-blue-400'   },
+        ],
+      },
+      {
+        title: 'Views',
+        items: [
+          { label: 'All Posts', href: '/dashboard/feedback' },
+        ],
+      },
+    ],
+  },
+  '/dashboard/roadmap': {
+    heading: 'Roadmap',
+    sections: [
+      {
+        title: 'Status',
+        items: [
+          { label: 'Planned',     href: '/dashboard/roadmap?status=planned',     color: 'bg-slate-400'  },
+          { label: 'In Progress', href: '/dashboard/roadmap?status=in-progress', color: 'bg-blue-400'   },
+          { label: 'Completed',   href: '/dashboard/roadmap?status=completed',   color: 'bg-green-400'  },
+        ],
+      },
+      {
+        title: 'Views',
+        items: [
+          { label: 'Board',    href: '/dashboard/roadmap' },
+          { label: 'Timeline', href: '/dashboard/roadmap/timeline' },
+          { label: 'List',     href: '/dashboard/roadmap/list' },
+        ],
+      },
+    ],
+  },
+  '/dashboard/changelog': {
+    heading: 'Changelog',
+    sections: [
+      {
+        title: 'Status',
+        items: [
+          { label: 'Published',  href: '/dashboard/changelog?status=published',  color: 'bg-green-400'  },
+          { label: 'Draft',      href: '/dashboard/changelog?status=draft',      color: 'bg-slate-400'  },
+          { label: 'Scheduled',  href: '/dashboard/changelog?status=scheduled',  color: 'bg-yellow-400' },
+        ],
+      },
+    ],
+  },
+  '/dashboard/surveys': {
+    heading: 'Surveys',
+    sections: [
+      {
+        title: 'Status',
+        items: [
+          { label: 'Active', href: '/dashboard/surveys?status=active', color: 'bg-green-400'  },
+          { label: 'Draft',  href: '/dashboard/surveys?status=draft',  color: 'bg-slate-400'  },
+          { label: 'Closed', href: '/dashboard/surveys?status=closed', color: 'bg-red-400'    },
+        ],
+      },
+    ],
+  },
+  '/dashboard/settings': {
+    heading: 'Settings',
+    sections: [
+      {
+        title: 'General',
+        items: [
+          { label: 'Workspace',    href: '/dashboard/settings' },
+          { label: 'Members',      href: '/dashboard/settings/members' },
+          { label: 'Billing',      href: '/dashboard/settings/billing' },
+        ],
+      },
+      {
+        title: 'Integrations',
+        items: [
+          { label: 'API Keys',     href: '/dashboard/settings/api-keys' },
+          { label: 'Webhooks',     href: '/dashboard/settings/webhooks' },
+        ],
+      },
+    ],
+  },
+};
+
+/** Returns the panel config whose route prefix matches the current pathname. */
+function getPanel(pathname: string): PanelConfig | null {
+  const key = Object.keys(PANEL_CONFIG).find((k) => pathname.startsWith(k));
+  return key ? PANEL_CONFIG[key] : null;
+}
 
 // ── Component ──────────────────────────────────────────────────────────────
 export function Sidebar() {
@@ -101,6 +203,8 @@ export function Sidebar() {
   const activeOrgColor  = activeOrg ? orgColor(activeOrg.name) : 'bg-indigo-500';
   const activeOrgLetter = activeOrg?.name.charAt(0).toUpperCase() ?? '?';
 
+  const panel = getPanel(pathname);
+
   // ── icon rail button style helper
   const railBtn = (href: string, exact?: boolean) =>
     `flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
@@ -130,14 +234,12 @@ export function Sidebar() {
 
           {orgOpen && (
             <div className="absolute left-full top-0 z-50 ml-3 w-60 overflow-hidden rounded-xl border bg-popover shadow-xl">
-              {/* Header */}
               <div className="border-b px-3 py-2.5">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Workspaces
                 </p>
               </div>
 
-              {/* Org list */}
               <div className="max-h-64 overflow-y-auto p-1">
                 {orgs && orgs.length > 0 ? (
                   <ul className="space-y-0.5">
@@ -175,7 +277,6 @@ export function Sidebar() {
                 )}
               </div>
 
-              {/* Create workspace */}
               <div className="border-t p-1">
                 <button
                   onClick={() => { setOrgOpen(false); router.push('/onboarding'); }}
@@ -250,71 +351,54 @@ export function Sidebar() {
       </div>
 
       {/* ════════════════════════════════════
-          COLUMN 2 — Org Panel (208 px)
-          Hidden when sidebar is collapsed
+          COLUMN 2 — Dynamic Panel
+          Shown only when a panel exists for
+          the current route & sidebarOpen
       ════════════════════════════════════ */}
-      {sidebarOpen && (
+      {panel && sidebarOpen && (
         <div className="flex w-52 flex-col border-r bg-card">
 
           {/* Panel header */}
           <div className="flex h-16 shrink-0 items-center border-b px-4">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Your organizations
+              {panel.heading}
             </span>
           </div>
 
-          {/* Org list */}
-          <div className="flex-1 overflow-y-auto px-2 py-2">
-            {orgs && orgs.length > 0 ? (
-              <ul className="space-y-0.5">
-                {orgs.map((org) => {
-                  const active     = org.id === activeOrg?.id;
-                  const isSwitching = switching === org.id;
-                  return (
-                    <li key={org.id}>
-                      <button
-                        onClick={() => handleSwitch(org.id)}
-                        disabled={isSwitching}
-                        className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors disabled:opacity-50 ${
-                          active
-                            ? 'bg-accent font-medium text-foreground'
-                            : 'text-foreground/80 hover:bg-accent hover:text-foreground'
-                        }`}
-                      >
-                        {/* Org avatar */}
-                        <div
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white ${orgColor(org.name)}`}
+          {/* Panel sections */}
+          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4">
+            {panel.sections.map((section) => (
+              <div key={section.title}>
+                <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  {section.title}
+                </p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const active = pathname + (typeof window !== 'undefined' ? window.location.search : '') === item.href
+                      || (item.href === pathname && !item.href.includes('?'));
+                    return (
+                      <li key={item.href}>
+                        <button
+                          onClick={() => router.push(item.href)}
+                          className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
+                            active
+                              ? 'bg-accent font-medium text-foreground'
+                              : 'text-foreground/80 hover:bg-accent hover:text-foreground'
+                          }`}
                         >
-                          {isSwitching
-                            ? <Loader2 className="h-3 w-3 animate-spin" />
-                            : org.name.charAt(0).toUpperCase()
-                          }
-                        </div>
-
-                        <span className="flex-1 truncate">{org.name}</span>
-
-                        {active && !isSwitching && (
-                          <Check className="h-3 w-3 shrink-0 text-primary" />
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="px-2 py-2 text-xs text-muted-foreground">No organizations yet.</p>
-            )}
-
-            {/* Create new workspace */}
-            <button
-              onClick={() => router.push('/onboarding')}
-              className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-dashed border-border">
-                <Plus className="h-3 w-3" />
+                          {item.color ? (
+                            <span className={`h-2 w-2 shrink-0 rounded-full ${item.color}`} />
+                          ) : (
+                            <Circle className="h-2 w-2 shrink-0 text-muted-foreground/40" />
+                          )}
+                          {item.label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-              Create workspace
-            </button>
+            ))}
           </div>
 
           {/* Resources footer */}

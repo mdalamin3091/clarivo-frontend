@@ -2,6 +2,6 @@
 
 import { DashboardShell } from '@/features/dashboard';
 
-export function DashboardClient() {
-  return <DashboardShell />;
+export function DashboardClient({ children }: { children?: React.ReactNode }) {
+  return <DashboardShell>{children}</DashboardShell>;
 }
