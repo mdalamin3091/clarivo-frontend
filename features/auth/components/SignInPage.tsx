@@ -22,10 +22,10 @@ export function SignInPage() {
   const form = useAuthForm('signin');
   const { handleSubmit, formState: { isSubmitting } } = form;
 
-  // Already authenticated → go straight to dashboard
+  // Already authenticated → go to org selection
   useEffect(() => {
     if (!isPending && session) {
-      router.replace('/dashboard');
+      router.replace('/org-select');
     }
   }, [session, isPending, router]);
 
@@ -37,7 +37,7 @@ export function SignInPage() {
         password: values.password,
       });
       if (error) throw new Error(error.message ?? 'Sign in failed');
-      router.replace('/dashboard');
+      router.replace('/org-select');
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong');
     }
@@ -49,7 +49,7 @@ export function SignInPage() {
     try {
       await signIn.social({
         provider: 'google',
-        callbackURL: `${window.location.origin}/dashboard`,
+        callbackURL: `${window.location.origin}/org-select`,
       });
     } catch {
       setServerError('Google sign-in failed. Please try again.');

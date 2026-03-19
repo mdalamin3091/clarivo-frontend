@@ -10,10 +10,12 @@ export default function Home() {
 
   useEffect(() => {
     if (isPending) return;
-    if (session) {
+    if (!session) {
+      router.replace('/signin');
+    } else if (session.session?.activeOrganizationId) {
       router.replace('/dashboard');
     } else {
-      router.replace('/signin');
+      router.replace('/org-select');
     }
   }, [session, isPending, router]);
 
