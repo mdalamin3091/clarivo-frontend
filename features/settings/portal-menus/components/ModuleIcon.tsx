@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { getIconComponent } from '../constants';
+import { ICON_MAP, isEmoji } from '@/shared/components/ui/IconPicker';
+import { HelpCircle } from 'lucide-react';
 
 interface ModuleIconProps {
   name:       string;
@@ -9,7 +10,9 @@ interface ModuleIconProps {
 }
 
 export function ModuleIcon({ name, className }: ModuleIconProps) {
-  // React.createElement avoids the react-hooks/static-components lint error
-  // that fires when a dynamic component is assigned and used as JSX (<Icon />).
-  return React.createElement(getIconComponent(name), { className });
+  if (isEmoji(name)) {
+    return <span className={className} style={{ fontSize: '1em', lineHeight: 1 }}>{name}</span>;
+  }
+  const Icon = ICON_MAP[name] ?? HelpCircle;
+  return React.createElement(Icon, { className });
 }

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconPicker } from "./IconPicker";
+import { IconPicker } from "@/shared/components/ui/IconPicker";
 import type { ModulePreset, PortalMenuItem } from "../types";
 import SelectModuleLink from "./SelectModuleLink";
 import { MODULE_PRESETS } from "../constants";

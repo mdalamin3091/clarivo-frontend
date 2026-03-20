@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { FormInput } from '@/shared/components/ui/FormInput';
-import { IconPicker } from './IconPicker';
+import { IconPicker } from '@/shared/components/ui/IconPicker';
 import { ModuleIcon } from './ModuleIcon';
 import type { ModulesFormValues } from '../validation/modules.schema';
 import SelectModuleLink from './SelectModuleLink';
