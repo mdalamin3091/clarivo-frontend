@@ -1,31 +1,3 @@
-export interface PortalMenuIcon {
-  type: 'predefined' | 'custom';
-  value: string;
-}
-
-export interface PortalMenuItem {
-  id: string;
-  name: string;
-  icon: PortalMenuIcon;
-  link: string;
-}
-
-export interface OrgMember {
-  id: string;
-  userId: string;
-  role: 'owner' | 'admin' | 'member';
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-export interface WorkspaceFormData {
-  name: string;
-  slug: string;
-}
-
 export interface BrandingData {
   id: string;
   name: string;

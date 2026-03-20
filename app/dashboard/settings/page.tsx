@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { getQueryClient } from '@/lib/get-query-client';
 import { getActiveOrgId, getServerHeaders } from '@/lib/session-server';
 import { queryKeys } from '@/lib/query-keys';
-import { getOrgMembers } from '@/features/settings/api';
+import { getOrgMembers } from '@/features/settings/members/api';
 import { SettingsWorkspacePage } from '@/features/settings';
 import { PageLoader } from '@/shared/components/ui/PageLoader';
 
