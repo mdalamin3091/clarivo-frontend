@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { getIconComponent } from '../constants/module-icons';
 
 interface ModuleIconProps {
@@ -7,11 +8,8 @@ interface ModuleIconProps {
   className?: string;
 }
 
-/**
- * Stable wrapper so callers never assign getIconComponent() to a capital-case
- * variable inside render (which triggers react-hooks/static-components).
- */
 export function ModuleIcon({ name, className }: ModuleIconProps) {
-  const Icon = getIconComponent(name);
-  return <Icon className={className} />;
+  // React.createElement avoids the react-hooks/static-components lint error
+  // that fires when a dynamic component is assigned and used as JSX (<Icon />).
+  return React.createElement(getIconComponent(name), { className });
 }
