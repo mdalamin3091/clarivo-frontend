@@ -1,6 +1,6 @@
 'use client';
 
-import { Webhook, Plus, Globe } from 'lucide-react';
+import { Plus, Globe } from 'lucide-react';
 
 export function SettingsWebhooksPage() {
   return (
