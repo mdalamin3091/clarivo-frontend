@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, BookOpen } from 'lucide-react';
@@ -35,7 +36,23 @@ export function SetupModulesForm() {
     if (menus) form.reset({ modules: menus });
   }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const saveAll = () => mutate(form.getValues().modules);
+  const findDuplicateModule = (menus: PortalMenuItem[]): PortalMenuItem | null => {
+    const links = menus.map(m => m.link.toLowerCase().trim());
+    const dupeIndex = links.findIndex((link, i) => links.indexOf(link) !== i);
+    return dupeIndex !== -1 ? (menus[dupeIndex] ?? null) : null;
+  };
+
+  const saveAll = () => {
+    const modules = form.getValues().modules;
+    const duplicate = findDuplicateModule(modules);
+    if (duplicate) {
+      toast.error('Duplicate link', {
+        description: `"${duplicate.name}" already has this link assigned.`,
+      });
+      return;
+    }
+    mutate(modules);
+  };
 
   const handleAdd = (menu: PortalMenuItem) => {
     append(menu);
@@ -122,6 +139,7 @@ export function SetupModulesForm() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onAdd={handleAdd}
+        existingLinks={form.getValues('modules').map(m => m.link)}
       />
     </FormProvider>
   );

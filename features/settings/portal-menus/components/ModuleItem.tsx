@@ -77,21 +77,6 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
             className="flex-1"
           />
         </div>
-
-        {/* Link — preview chip above, editable input below */}
-        {/* <div className="space-y-1.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted px-3 py-1 text-xs text-foreground">
-            <LinkIcon className="h-3 w-3" />
-            {link || 'No link set'}
-          </span>
-          <FormInput
-            control={control}
-            name={`modules.${index}.link` as ModulePath}
-            label="Link"
-            inputProps={{ placeholder: '/your-link' }}
-            inputClassName="h-9 rounded-lg"
-          />
-        </div> */}
         <SelectModuleLink
             selectedPreset={selectedPreset}
             onSelect={handlePresetSelect}

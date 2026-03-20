@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -20,22 +21,22 @@ interface AddModuleDialogProps {
   open: boolean;
   onClose: () => void;
   onAdd: (module: PortalMenuItem) => void;
+  existingLinks: string[];
 }
 
 export function AddModuleDialog({
   open,
   onClose,
   onAdd,
+  existingLinks,
 }: AddModuleDialogProps) {
   const [selectedPreset, setSelectedPreset] = useState<ModulePreset>(
     MODULE_PRESETS[0],
   );
   const [name, setName] = useState(MODULE_PRESETS[0].name);
   const [iconName, setIconName] = useState(MODULE_PRESETS[0].iconName);
-  const [customLink, setCustomLink] = useState("");
 
-  const isCustom = selectedPreset.value === "custom";
-  const effectiveLink = isCustom ? customLink : selectedPreset.link;
+  const effectiveLink = selectedPreset.link;
 
   const handlePresetSelect = (preset: ModulePreset) => {
     setSelectedPreset(preset);
@@ -48,6 +49,16 @@ export function AddModuleDialog({
     const trimmedLink = effectiveLink.trim();
     if (!trimmedName || !trimmedLink) return;
 
+    const isDuplicate = existingLinks.some(
+      (l) => l.toLowerCase() === trimmedLink.toLowerCase(),
+    );
+    if (isDuplicate) {
+      toast.error("Duplicate link", {
+        description: `"${trimmedName}" is already used by another menu item.`,
+      });
+      return;
+    }
+
     onAdd({
       id: crypto.randomUUID(),
       name: trimmedName,
@@ -56,7 +67,6 @@ export function AddModuleDialog({
     });
 
     handlePresetSelect(MODULE_PRESETS[0]);
-    setCustomLink("");
     onClose();
   };
 
