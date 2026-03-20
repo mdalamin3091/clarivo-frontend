@@ -7,3 +7,15 @@ export async function updateOrgBranding(data: BrandingFormData): Promise<Brandin
     body: JSON.stringify(data),
   });
 }
+
+export async function uploadBrandingImage(
+  file: File,
+  type: 'logo' | 'social',
+): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiFetch<{ url: string }>(`/api/v1/upload/image?type=${type}`, {
+    method: 'POST',
+    body: formData,
+  });
+}
