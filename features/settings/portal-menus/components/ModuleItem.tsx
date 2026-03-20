@@ -2,7 +2,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import type { FieldPath } from 'react-hook-form';
-import { Trash2, Loader2 } from 'lucide-react';
+import { Trash2, Loader2, GripVertical } from 'lucide-react';
 import {
   AccordionContent,
   AccordionItem,
@@ -22,14 +22,16 @@ import type { ModulePreset } from '../types';
 type ModulePath = FieldPath<ModulesFormValues>;
 
 interface ModuleItemProps {
-  index:     number;
-  fieldId:   string;
-  onSave:    () => void;
-  onDelete:  () => void;
-  isPending: boolean;
+  index:            number;
+  fieldId:          string;
+  onSave:           () => void;
+  onDelete:         () => void;
+  isPending:        boolean;
+  dragHandleRef?:   (el: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
-export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: ModuleItemProps) {
+export function ModuleItem({ index, fieldId, onSave, onDelete, isPending, dragHandleRef, dragHandleProps }: ModuleItemProps) {
   const { watch, setValue, control } = useFormContext<ModulesFormValues>();
 
   const name      = watch(`modules.${index}.name`       as ModulePath) as string;
@@ -49,6 +51,14 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
       {/* ── Header ── */}
       <AccordionTrigger className="px-4 py-3 bg-muted/50 hover:bg-muted hover:no-underline [&>svg]:text-muted-foreground">
         <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <span
+            ref={dragHandleRef}
+            {...dragHandleProps}
+            onClick={(e) => e.stopPropagation()}
+            className="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </span>
           <ModuleIcon name={iconValue} className="h-4 w-4 text-muted-foreground" />
           {name || 'Untitled Module'}
         </span>

@@ -4,10 +4,11 @@ export interface PortalMenuIcon {
 }
 
 export interface PortalMenuItem {
-  id: string;
-  name: string;
-  icon: PortalMenuIcon;
-  link: string;
+  id:    string;
+  name:  string;
+  icon:  PortalMenuIcon;
+  link:  string;
+  order: number;
 }
 
 // ── Module preset options ──────────────────────────────────────────────────────

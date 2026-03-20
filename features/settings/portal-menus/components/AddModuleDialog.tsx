@@ -18,10 +18,11 @@ import { MODULE_PRESETS } from "../constants";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 interface AddModuleDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onAdd: (module: PortalMenuItem) => void;
+  open:          boolean;
+  onClose:       () => void;
+  onAdd:         (module: PortalMenuItem) => void;
   existingLinks: string[];
+  existingCount: number;
 }
 
 export function AddModuleDialog({
@@ -29,6 +30,7 @@ export function AddModuleDialog({
   onClose,
   onAdd,
   existingLinks,
+  existingCount,
 }: AddModuleDialogProps) {
   const [selectedPreset, setSelectedPreset] = useState<ModulePreset>(
     MODULE_PRESETS[0],
@@ -60,10 +62,11 @@ export function AddModuleDialog({
     }
 
     onAdd({
-      id: crypto.randomUUID(),
-      name: trimmedName,
-      icon: { type: "predefined", value: iconName },
-      link: trimmedLink,
+      id:    crypto.randomUUID(),
+      name:  trimmedName,
+      icon:  { type: "predefined", value: iconName },
+      link:  trimmedLink,
+      order: existingCount + 1,
     });
 
     handlePresetSelect(MODULE_PRESETS[0]);

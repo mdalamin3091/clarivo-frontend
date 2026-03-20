@@ -5,14 +5,23 @@ import { toast } from 'sonner';
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, BookOpen } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useActiveOrganization } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Accordion } from '@/components/ui/accordion';
 import { modulesFormSchema, type ModulesFormValues } from '../validation/modules.schema';
 import { useOrgModules } from '../hooks/useOrgModules';
 import { useUpdateModules } from '../hooks/useUpdateModules';
-import { Accordion } from '@/components/ui/accordion';
-import { ModuleItem } from './ModuleItem';
+import { SortableModuleItem } from './SortableModuleItem';
 import { AddModuleDialog } from './AddModuleDialog';
 import type { PortalMenuItem } from '../types';
 
@@ -27,14 +36,40 @@ export function SetupModulesForm() {
     defaultValues: { modules: [] },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: 'modules',
   });
 
+  // Sort by order when data arrives
   useEffect(() => {
-    if (menus) form.reset({ modules: menus });
+    if (menus) {
+      const sorted = [...menus].sort((a, b) => a.order - b.order);
+      form.reset({ modules: sorted });
+    }
   }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // dnd-kit: require 5px drag distance to avoid clashing with accordion clicks
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const reindexOrders = (modules: PortalMenuItem[]): PortalMenuItem[] =>
+    modules.map((m, i) => ({ ...m, order: i + 1 }));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = fields.findIndex(f => f.id === active.id);
+    const newIndex = fields.findIndex(f => f.id === over.id);
+    move(oldIndex, newIndex);
+
+    // Re-index orders after reorder and persist immediately
+    const reordered = reindexOrders(arrayMove(form.getValues().modules, oldIndex, newIndex));
+    form.setValue('modules', reordered);
+    mutate(reordered);
+  };
 
   const findDuplicateModule = (menus: PortalMenuItem[]): PortalMenuItem | null => {
     const links = menus.map(m => m.link.toLowerCase().trim());
@@ -43,7 +78,7 @@ export function SetupModulesForm() {
   };
 
   const saveAll = () => {
-    const modules = form.getValues().modules;
+    const modules = reindexOrders(form.getValues().modules);
     const duplicate = findDuplicateModule(modules);
     if (duplicate) {
       toast.error('Duplicate link', {
@@ -55,12 +90,15 @@ export function SetupModulesForm() {
   };
 
   const handleAdd = (menu: PortalMenuItem) => {
-    append(menu);
-    mutate(form.getValues().modules);
+    const updated = reindexOrders([...form.getValues().modules, menu]);
+    append(updated[updated.length - 1]!);
+    mutate(updated);
   };
 
   const handleDelete = (index: number) => {
-    const updated = form.getValues().modules.filter((_, i) => i !== index);
+    const updated = reindexOrders(
+      form.getValues().modules.filter((_, i) => i !== index),
+    );
     remove(index);
     mutate(updated);
   };
@@ -76,12 +114,12 @@ export function SetupModulesForm() {
   return (
     <FormProvider {...form}>
 
-      {/* ── Section header — outside the card ── */}
+      {/* ── Section header ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Customize / disable modules</h3>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Reorder, customize, or remove links from your public portal and widgets.
+            Drag to reorder, customize, or remove links from your public portal.
           </p>
         </div>
         <Button
@@ -98,24 +136,35 @@ export function SetupModulesForm() {
       {/* ── Card: module list + footer ── */}
       <div className="rounded-xl border bg-card p-6 space-y-4">
 
-        {/* Module list — single Accordion so only one item is open at a time */}
         {fields.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             No modules yet. Add one to get started.
           </p>
         ) : (
-          <Accordion type="single" collapsible className="space-y-2">
-            {fields.map((field, index) => (
-              <ModuleItem
-                key={field.id}
-                index={index}
-                fieldId={field.id}
-                onSave={saveAll}
-                onDelete={() => handleDelete(index)}
-                isPending={isPending}
-              />
-            ))}
-          </Accordion>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={fields.map(f => f.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Accordion type="single" collapsible className="space-y-2">
+                {fields.map((field, index) => (
+                  <SortableModuleItem
+                    key={field.id}
+                    id={field.id}
+                    index={index}
+                    fieldId={field.id}
+                    onSave={saveAll}
+                    onDelete={() => handleDelete(index)}
+                    isPending={isPending}
+                  />
+                ))}
+              </Accordion>
+            </SortableContext>
+          </DndContext>
         )}
 
         <Separator />
@@ -140,6 +189,7 @@ export function SetupModulesForm() {
         onClose={() => setDialogOpen(false)}
         onAdd={handleAdd}
         existingLinks={form.getValues('modules').map(m => m.link)}
+        existingCount={fields.length}
       />
     </FormProvider>
   );
