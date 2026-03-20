@@ -102,6 +102,7 @@ export const PANEL_CONFIG: Record<string, PanelConfig> = {
         title: 'General',
         items: [
           { label: 'Workspace', href: '/dashboard/settings' },
+          { label: 'Branding',  href: '/dashboard/settings/branding' },
           { label: 'Members',   href: '/dashboard/settings/members' },
           { label: 'Billing',   href: '/dashboard/settings/billing' },
         ],
