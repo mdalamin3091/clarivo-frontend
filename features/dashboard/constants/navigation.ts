@@ -102,9 +102,15 @@ export const PANEL_CONFIG: Record<string, PanelConfig> = {
         title: 'General',
         items: [
           { label: 'Workspace', href: '/dashboard/settings' },
-          { label: 'Branding',  href: '/dashboard/settings/branding' },
           { label: 'Members',   href: '/dashboard/settings/members' },
           { label: 'Billing',   href: '/dashboard/settings/billing' },
+        ],
+      },
+       {
+        title: 'Branding & Customization',
+        items: [
+          { label: 'Branding',  href: '/dashboard/settings/branding' },
+          { label: 'Setup Modules',  href: '/dashboard/settings/setup-modules' },
         ],
       },
       {

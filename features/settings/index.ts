@@ -4,3 +4,4 @@ export { SettingsBillingPage } from './components/SettingsBillingPage';
 export { SettingsApiKeysPage } from './components/SettingsApiKeysPage';
 export { SettingsWebhooksPage } from './components/SettingsWebhooksPage';
 export { BrandingPage } from './components/BrandingPage';
+export { SetupModulesPage } from './components/SetupModulesPage';

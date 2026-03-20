@@ -8,8 +8,8 @@ export const queryKeys = {
   },
   organizations: {
     checkName: (name: string) => ['organizations', 'check-name', name] as const,
-    active:    (orgId: string) => ['organizations', orgId] as const,
-    members:   (orgId: string) => ['organizations', orgId, 'members'] as const,
+    active:  (orgId: string) => ['organizations', orgId] as const,
+    members: (orgId: string) => ['organizations', orgId, 'members'] as const,
   },
   feedback: {
     list:   (orgId: string)              => ['feedback', orgId, 'posts'] as const,
