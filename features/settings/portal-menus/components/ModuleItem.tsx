@@ -2,7 +2,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import type { FieldPath } from 'react-hook-form';
-import { Trash2, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 import {
   AccordionContent,
   AccordionItem,
@@ -14,6 +14,9 @@ import { FormInput } from '@/shared/components/ui/FormInput';
 import { IconPicker } from './IconPicker';
 import { ModuleIcon } from './ModuleIcon';
 import type { ModulesFormValues } from '../validation/modules.schema';
+import SelectModuleLink from './SelectModuleLink';
+import { MODULE_PRESETS } from '../constants';
+import type { ModulePreset } from '../types';
 
 // Template-literal field paths need a cast to satisfy FieldPath<T>
 type ModulePath = FieldPath<ModulesFormValues>;
@@ -32,6 +35,13 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
   const name      = watch(`modules.${index}.name`       as ModulePath) as string;
   const iconValue = watch(`modules.${index}.icon.value` as ModulePath) as string;
   const link      = watch(`modules.${index}.link`       as ModulePath) as string;
+
+  const selectedPreset =
+    MODULE_PRESETS.find((p) => p.link === link) ?? MODULE_PRESETS[0];
+
+  const handlePresetSelect = (preset: ModulePreset) => {
+    setValue(`modules.${index}.link` as ModulePath, preset.link as never, { shouldDirty: true });
+  };
 
   return (
     <AccordionItem value={fieldId} className="overflow-hidden rounded-xl border bg-muted/30">
@@ -69,7 +79,7 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
         </div>
 
         {/* Link — preview chip above, editable input below */}
-        <div className="space-y-1.5">
+        {/* <div className="space-y-1.5">
           <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted px-3 py-1 text-xs text-foreground">
             <LinkIcon className="h-3 w-3" />
             {link || 'No link set'}
@@ -81,7 +91,11 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
             inputProps={{ placeholder: '/your-link' }}
             inputClassName="h-9 rounded-lg"
           />
-        </div>
+        </div> */}
+        <SelectModuleLink
+            selectedPreset={selectedPreset}
+            onSelect={handlePresetSelect}
+          />
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-1">

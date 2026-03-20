@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { getIconComponent } from '../constants/module-icons';
+import { getIconComponent } from '../constants';
 
 interface ModuleIconProps {
   name:       string;

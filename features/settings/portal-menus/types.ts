@@ -9,3 +9,13 @@ export interface PortalMenuItem {
   icon: PortalMenuIcon;
   link: string;
 }
+
+// ── Module preset options ──────────────────────────────────────────────────────
+
+export interface ModulePreset {
+  value:    string;
+  label:    string;
+  name:     string;
+  link:     string;
+  iconName: string;
+}

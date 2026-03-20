@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PREDEFINED_ICONS } from '../constants/module-icons';
+import { PREDEFINED_ICONS } from '../constants';
 import { ModuleIcon } from './ModuleIcon';
 
 interface IconPickerProps {
