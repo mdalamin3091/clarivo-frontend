@@ -3,7 +3,6 @@
 import { useFormContext } from 'react-hook-form';
 import { Trash2, Link as LinkIcon, Loader2 } from 'lucide-react';
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
@@ -31,11 +30,10 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
   const link      = watch(`modules.${index}.link`);
 
   return (
-    <Accordion type="single" collapsible className="overflow-hidden rounded-xl border bg-card">
-      <AccordionItem value={fieldId} className="border-0">
+    <AccordionItem value={fieldId} className="overflow-hidden rounded-xl border bg-muted/30">
 
         {/* ── Header ── */}
-        <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline [&>svg]:text-muted-foreground">
+        <AccordionTrigger className="px-4 py-3 bg-muted/50 hover:bg-muted hover:no-underline [&>svg]:text-muted-foreground">
           <span className="flex items-center gap-2 text-sm font-medium text-foreground">
             <ModuleIcon name={iconValue} className="h-4 w-4 text-muted-foreground" />
             {name || 'Untitled Module'}
@@ -56,7 +54,7 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
               <Input
                 {...register(`modules.${index}.name`)}
                 placeholder="Module name"
-                className="h-9 flex-1 rounded-lg text-sm"
+                className="h-9 flex-1 rounded-lg bg-muted/60 text-sm"
               />
             </div>
           </div>
@@ -72,7 +70,7 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
               <Input
                 {...register(`modules.${index}.link`)}
                 placeholder="/your-link"
-                className="h-9 min-w-0 flex-1 rounded-lg text-sm"
+                className="h-9 min-w-0 flex-1 rounded-lg bg-muted/60 text-sm"
               />
             </div>
           </div>
@@ -101,6 +99,5 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
           </div>
         </AccordionContent>
       </AccordionItem>
-    </Accordion>
   );
 }

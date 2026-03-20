@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { modulesFormSchema, type ModulesFormValues } from '../validation/modules.schema';
 import { useOrgModules } from '../hooks/useOrgModules';
 import { useUpdateModules } from '../hooks/useUpdateModules';
+import { Accordion } from '@/components/ui/accordion';
 import { ModuleItem } from './ModuleItem';
 import { AddModuleDialog } from './AddModuleDialog';
 import type { PortalMenuItem } from '../types';
@@ -80,14 +81,14 @@ export function SetupModulesForm() {
       {/* ── Card: module list + footer ── */}
       <div className="rounded-xl border bg-card p-6 space-y-4">
 
-        {/* Module list */}
-        <div className="space-y-2">
-          {fields.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No modules yet. Add one to get started.
-            </p>
-          ) : (
-            fields.map((field, index) => (
+        {/* Module list — single Accordion so only one item is open at a time */}
+        {fields.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No modules yet. Add one to get started.
+          </p>
+        ) : (
+          <Accordion type="single" collapsible className="space-y-2">
+            {fields.map((field, index) => (
               <ModuleItem
                 key={field.id}
                 index={index}
@@ -96,9 +97,9 @@ export function SetupModulesForm() {
                 onDelete={() => handleDelete(index)}
                 isPending={isPending}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </Accordion>
+        )}
 
         <Separator />
 

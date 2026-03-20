@@ -89,30 +89,38 @@
 }
 
 /* ─── Animations ───────────────────────────────────────────────────────────── */
+
+/* Accordion — uses --radix-accordion-content-height set by Radix UI at runtime */
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
+}
+
 @keyframes step-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-
-.animate-step-in {
-  animation: step-in 0.22s ease-out both;
+/* Register as Tailwind v4 theme tokens so animate-* utilities are generated */
+@theme inline {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up:   accordion-up   0.2s ease-out;
+  --animate-step-in:        step-in  0.22s ease-out both;
+  --animate-fade-in:        fade-in  0.15s ease-out both;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.15s ease-out both;
-}
+.animate-step-in  { animation: var(--animate-step-in); }
+.animate-fade-in  { animation: var(--animate-fade-in); }
 
 
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
