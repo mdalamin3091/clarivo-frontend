@@ -49,7 +49,7 @@ export function BrandingForm() {
     if (!org) return;
     const extra = org as unknown as Record<string, string | null | undefined>;
     form.reset({
-      name:         org.name,
+      displayName:  extra.displayName ?? org.name,
       defaultTheme: (extra.defaultTheme as BrandingFormValues['defaultTheme']) ?? 'system',
       brandColor:   extra.brandColor  ?? null,
       darkBgColor:  extra.darkBgColor ?? null,
@@ -82,9 +82,9 @@ export function BrandingForm() {
         <div className="grid grid-cols-2 gap-6">
           <FormInput
             control={form.control}
-            name="name"
-            label="Name"
-            inputProps={{ placeholder: 'Organization name' }}
+            name="displayName"
+            label="Display Name"
+            inputProps={{ placeholder: 'Display name' }}
             inputClassName="h-9 rounded-lg"
           />
 

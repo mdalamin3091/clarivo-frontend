@@ -19,6 +19,7 @@ export interface BrandingData {
   name: string;
   slug: string;
   logo: string | null;
+  displayName: string | null;
   brandColor: string | null;
   darkBgColor: string | null;
   defaultTheme: string | null;
@@ -26,7 +27,7 @@ export interface BrandingData {
 }
 
 export interface BrandingFormData {
-  name?: string;
+  displayName?: string;
   brandColor?: string | null;
   darkBgColor?: string | null;
   defaultTheme?: 'system' | 'light' | 'dark';

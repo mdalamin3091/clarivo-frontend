@@ -6,7 +6,7 @@ const hexColor = z
   .nullable();
 
 export const brandingSchema = z.object({
-  name:         z.string().min(2, 'Name must be at least 2 characters').max(100).trim(),
+  displayName:  z.string().min(2, 'Display name must be at least 2 characters').max(100).trim(),
   defaultTheme: z.enum(['system', 'light', 'dark']),
   brandColor:   hexColor,
   darkBgColor:  hexColor,

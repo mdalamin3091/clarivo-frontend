@@ -19,7 +19,7 @@ export function useBrandingForm() {
     // Resolver<BrandingFormValues> — known typing gap in the current versions.
     resolver: zodResolver(brandingSchema) as Resolver<BrandingFormValues>,
     defaultValues: {
-      name:         '',
+      displayName:  '',
       defaultTheme: 'system',
       brandColor:   null,
       darkBgColor:  null,
