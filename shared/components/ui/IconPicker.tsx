@@ -52,26 +52,15 @@ function IconsTab({ value, onSelect }: IconsTabProps) {
 
   return (
     <>
-      <div className="border-b px-2 py-2">
-        <div className="flex items-center gap-1.5 rounded-md border bg-muted/40 px-2">
-          <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search icons..."
-            className="flex-1 bg-transparent py-1.5 text-xs outline-none placeholder:text-muted-foreground"
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              className="shrink-0 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+      <div className="flex h-9 items-center gap-2 border-b px-3">
+        <Search className="size-4 shrink-0 opacity-50" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search icons..."
+          className="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          onKeyDown={(e) => e.stopPropagation()}
+        />
       </div>
 
       <div className="max-h-64 overflow-y-auto p-2">
