@@ -191,3 +191,13 @@ export function isEmoji(str: string): boolean {
   if (!str || /^[A-Z]/.test(str)) return false;
   return /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u.test(str);
 }
+
+/** True when the string is an uploaded image URL (HTTP/HTTPS) or image extension. */
+export function isImageUrl(str: string): boolean {
+  if (!str) return false;
+  return (
+    str.startsWith('http://') ||
+    str.startsWith('https://') ||
+    /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(str)
+  );
+}

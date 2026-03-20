@@ -48,7 +48,7 @@ function EmojiPickerSearch({
 
 function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
   return (
-    <div {...props} className="scroll-my-1 px-1" data-slot="emoji-picker-row">
+    <div {...props} className="scroll-my-1 px-2" data-slot="emoji-picker-row">
       {children}
     </div>
   );
@@ -63,7 +63,7 @@ function EmojiPickerEmoji({
     <button
       {...props}
       className={cn(
-        "data-active:bg-accent flex size-7 items-center justify-center rounded-sm text-base",
+        "data-active:bg-accent flex size-8 items-center justify-center rounded-sm text-base",
         className
       )}
       data-slot="emoji-picker-emoji"
