@@ -63,10 +63,12 @@ export function SetupModulesForm() {
 
     const oldIndex = fields.findIndex(f => f.id === active.id);
     const newIndex = fields.findIndex(f => f.id === over.id);
-    move(oldIndex, newIndex);
 
-    // Re-index orders after reorder and persist immediately
+    // Compute reordered array BEFORE calling move() — move() updates the form
+    // store synchronously, so getValues() after it would return already-moved data
+    // causing arrayMove to be applied twice and producing the wrong position.
     const reordered = reindexOrders(arrayMove(form.getValues().modules, oldIndex, newIndex));
+    move(oldIndex, newIndex);
     form.setValue('modules', reordered);
     mutate(reordered);
   };
