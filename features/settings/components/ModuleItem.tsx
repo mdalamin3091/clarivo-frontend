@@ -54,7 +54,7 @@ export function ModuleItem({ index, fieldId, onSave, onDelete, isPending }: Modu
               <Input
                 {...register(`modules.${index}.name`)}
                 placeholder="Module name"
-                className="h-9 flex-1 rounded-lg bg-muted/60 text-sm"
+                className="h-9 flex-1 rounded-lg text-sm"
               />
             </div>
           </div>

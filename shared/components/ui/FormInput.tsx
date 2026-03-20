@@ -46,7 +46,7 @@ export function FormInput<T extends FieldValues>({
               {...inputProps}
               {...field}
               className={cn(
-                'h-12 rounded-xl border-border/60 bg-background px-4 text-sm',
+                'h-12 rounded-xl border-border/60 bg-muted/60 px-4 text-sm',
                 'placeholder:text-muted-foreground/50',
                 'focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20',
                 inputClassName,

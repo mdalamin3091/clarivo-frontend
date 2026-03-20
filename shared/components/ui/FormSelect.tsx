@@ -52,7 +52,7 @@ export function FormSelect<T extends FieldValues>({
           <FormLabel>{label}</FormLabel>
           <Select value={field.value} onValueChange={field.onChange}>
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className='bg-muted/60'>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
