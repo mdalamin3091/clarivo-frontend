@@ -113,6 +113,12 @@ export const PANEL_CONFIG: Record<string, PanelConfig> = {
           { label: 'Setup Modules',  href: '/dashboard/settings/setup-modules' },
         ],
       },
+       {
+        title: 'Access & Authentication',
+        items: [
+          { label: 'Organization Access',  href: '/dashboard/settings/organization-access' },
+        ],
+      },
       {
         title: 'Integrations',
         items: [
