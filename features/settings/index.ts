@@ -1,6 +1,7 @@
-export { SettingsWorkspacePage } from './components/SettingsWorkspacePage';
-export { SettingsMembersPage } from './components/SettingsMembersPage';
-export { SettingsBillingPage } from './components/SettingsBillingPage';
-export { SettingsApiKeysPage } from './components/SettingsApiKeysPage';
-export { SettingsWebhooksPage } from './components/SettingsWebhooksPage';
-export { BrandingPage } from './components/BrandingPage';
+export { SettingsWorkspacePage } from './workspace/components/SettingsWorkspacePage';
+export { SettingsMembersPage }   from './members/components/SettingsMembersPage';
+export { BrandingPage }          from './branding/components/BrandingPage';
+export { SetupModulesPage }      from './portal-menus/components/SetupModulesPage';
+export { SettingsBillingPage }   from './billing/components/SettingsBillingPage';
+export { SettingsApiKeysPage }   from './api-keys/components/SettingsApiKeysPage';
+export { SettingsWebhooksPage }  from './webhooks/components/SettingsWebhooksPage';

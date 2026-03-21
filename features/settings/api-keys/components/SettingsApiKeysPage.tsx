@@ -1,6 +1,6 @@
 'use client';
 
-import { Key, Plus, Copy, Trash2 } from 'lucide-react';
+import { Key, Plus } from 'lucide-react';
 
 export function SettingsApiKeysPage() {
   return (

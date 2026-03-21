@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, useEffect, useRef } from 'react';
 import { useWatch } from 'react-hook-form';
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Upload } from 'lucide-react';
 import { useActiveOrganization } from '@/lib/auth-client';
 import {
   Form,
@@ -18,7 +18,7 @@ import { FormSelect } from '@/shared/components/ui/FormSelect';
 import { ColorField } from './ColorField';
 import { useBrandingForm } from '../hooks/useBrandingForm';
 import { useUpdateBranding } from '../hooks/useUpdateBranding';
-import { fileToDataUrl } from '../utils/branding';
+import { useUploadImage } from '../hooks/useUploadImage';
 import type { BrandingFormValues } from '../validation/branding.schema';
 
 /**
@@ -34,9 +34,10 @@ import type { BrandingFormValues } from '../validation/branding.schema';
  * their internal draft state from the fresh field value — no setState-in-effect.
  */
 export function BrandingForm() {
-  const { data: org, refetch }  = useActiveOrganization();
-  const form                    = useBrandingForm();
-  const { mutate, isPending }   = useUpdateBranding(() => refetch());
+  const { data: org, refetch }            = useActiveOrganization();
+  const form                              = useBrandingForm();
+  const { mutate, isPending }             = useUpdateBranding(() => refetch());
+  const { mutate: upload, isPending: isUploading } = useUploadImage();
 
   const logoInputRef   = useRef<HTMLInputElement>(null);
   const socialInputRef = useRef<HTMLInputElement>(null);
@@ -58,16 +59,24 @@ export function BrandingForm() {
     });
   }, [org?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleLogoChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    form.setValue('logo', await fileToDataUrl(file), { shouldDirty: true });
+    upload(
+      { file, type: 'logo' },
+      { onSuccess: ({ url }) => form.setValue('logo', url, { shouldDirty: true }) },
+    );
+    e.target.value = '';
   };
 
-  const handleSocialChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSocialChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    form.setValue('socialImage', await fileToDataUrl(file), { shouldDirty: true });
+    upload(
+      { file, type: 'social' },
+      { onSuccess: ({ url }) => form.setValue('socialImage', url, { shouldDirty: true }) },
+    );
+    e.target.value = '';
   };
 
   const onSubmit = (values: BrandingFormValues) => mutate(values);
@@ -114,13 +123,19 @@ export function BrandingForm() {
                   orgInitial
                 )}
               </div>
-              <Label className="cursor-pointer rounded-lg border bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/80">
-                Choose File
+              <Label className="flex cursor-pointer items-center gap-1.5 rounded-lg border bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/80">
+                {isUploading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Upload className="h-3 w-3" />
+                )}
+                {isUploading ? 'Uploading…' : 'Choose File'}
                 <Input
                   ref={logoInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
+                  disabled={isUploading}
                   onChange={handleLogoChange}
                 />
               </Label>
@@ -153,7 +168,12 @@ export function BrandingForm() {
               Featured Image for Social Media
             </Label>
             <Label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-6 transition-colors hover:bg-muted/50">
-              {socialValue ? (
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Uploading…</span>
+                </>
+              ) : socialValue ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={socialValue}
@@ -171,6 +191,7 @@ export function BrandingForm() {
                 type="file"
                 accept="image/*"
                 className="hidden"
+                disabled={isUploading}
                 onChange={handleSocialChange}
               />
             </Label>
