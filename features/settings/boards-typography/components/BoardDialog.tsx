@@ -18,8 +18,8 @@ import { Button }   from '@/components/ui/button';
 import { Input }    from '@/components/ui/input';
 import { Label }    from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch }   from '@/components/ui/switch';
 import { IconPicker, isEmoji, isImageUrl } from '@/shared/components/ui/IconPicker';
+import { SwitchRow } from '@/shared/components/ui/SwitchRow';
 import { useCreateBoard } from '../hooks/useCreateBoard';
 import { useUpdateBoard }  from '../hooks/useUpdateBoard';
 import type { Board, BoardSorting, BoardVisibility, CreateBoardInput } from '../types';
@@ -65,27 +65,6 @@ function VisibilityCard({ selected, onSelect, icon, title, description }: Visibi
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
       </div>
     </button>
-  );
-}
-
-// ── Switch row ───────────────────────────────────────────────────────────────
-
-interface SwitchRowProps {
-  checked:     boolean;
-  onChange:    (checked: boolean) => void;
-  label:       string;
-  description: string;
-}
-
-function SwitchRow({ checked, onChange, label, description }: SwitchRowProps) {
-  return (
-    <div className="flex items-start justify-between gap-6 rounded-lg border border-border bg-muted/20 px-4 py-3.5">
-      <div className="space-y-0.5">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
-      </div>
-      <Switch checked={checked} onCheckedChange={onChange} className="mt-0.5 shrink-0" />
-    </div>
   );
 }
 
