@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, X, Info, Loader2 } from 'lucide-react';
+import { Settings, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -40,9 +40,6 @@ export function BoardCard({ board }: Props) {
 
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-            <Info className="h-3.5 w-3.5" />
-          </Button>
 
           <Button
             variant="ghost"

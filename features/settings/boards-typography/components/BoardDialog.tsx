@@ -8,12 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button }    from '@/components/ui/button';
-import { Input }     from '@/components/ui/input';
-import { Label }     from '@/components/ui/label';
-import { Textarea }  from '@/components/ui/textarea';
-import { Switch }    from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Button }   from '@/components/ui/button';
+import { Input }    from '@/components/ui/input';
+import { Label }    from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch }   from '@/components/ui/switch';
 import { IconPicker, isEmoji, isImageUrl } from '@/shared/components/ui/IconPicker';
 import { useCreateBoard } from '../hooks/useCreateBoard';
 import { useUpdateBoard }  from '../hooks/useUpdateBoard';
@@ -66,9 +71,9 @@ function VisibilityCard({ selected, onSelect, icon, title, description }: Visibi
 // ── Switch row ───────────────────────────────────────────────────────────────
 
 interface SwitchRowProps {
-  checked:    boolean;
-  onChange:   (checked: boolean) => void;
-  label:      string;
+  checked:     boolean;
+  onChange:    (checked: boolean) => void;
+  label:       string;
   description: string;
 }
 
@@ -87,59 +92,50 @@ function SwitchRow({ checked, onChange, label, description }: SwitchRowProps) {
 // ── Form state ───────────────────────────────────────────────────────────────
 
 interface FormState {
-  name:                    string;
-  iconValue:               string;
-  visibility:              BoardVisibility;
-  defaultSorting:          BoardSorting;
-  allowSubscribe:          boolean;
+  name:                     string;
+  iconValue:                string;
+  visibility:               BoardVisibility;
+  defaultSorting:           BoardSorting;
+  allowSubscribe:           boolean;
   disableFollowupQuestions: boolean;
-  disableEndUserPosting:   boolean;
-  welcomingTitle:          string;
-  welcomingDescription:    string;
-  postCreationButtonText:  string;
+  disableEndUserPosting:    boolean;
+  welcomingTitle:           string;
+  welcomingDescription:     string;
+  postCreationButtonText:   string;
 }
+
+const DEFAULT_MESSAGES = {
+  welcomingTitle:         'What would you like to see next?',
+  welcomingDescription:   'Share your ideas, report bugs, or vote on what matters most to you.',
+  postCreationButtonText: 'Share Your Idea',
+};
 
 function emptyForm(): FormState {
   return {
-    name:                    '',
-    iconValue:               'MessageSquare',
-    visibility:              'public',
-    defaultSorting:          'trending',
-    allowSubscribe:          true,
+    name:                     '',
+    iconValue:                'MessageSquare',
+    visibility:               'public',
+    defaultSorting:           'trending',
+    allowSubscribe:           true,
     disableFollowupQuestions: false,
-    disableEndUserPosting:   false,
-    welcomingTitle:          '',
-    welcomingDescription:    '',
-    postCreationButtonText:  '',
+    disableEndUserPosting:    false,
+    ...DEFAULT_MESSAGES,
   };
 }
 
 function boardToForm(board: Board): FormState {
   return {
-    name:                    board.name,
-    iconValue:               board.icon.value,
-    visibility:              board.visibility,
-    defaultSorting:          board.defaultSorting,
-    allowSubscribe:          board.allowSubscribe,
+    name:                     board.name,
+    iconValue:                board.icon.value,
+    visibility:               board.visibility,
+    defaultSorting:           board.defaultSorting,
+    allowSubscribe:           board.allowSubscribe,
     disableFollowupQuestions: board.disableFollowupQuestions,
-    disableEndUserPosting:   board.disableEndUserPosting,
-    welcomingTitle:          board.greeting?.welcomingTitle ?? '',
-    welcomingDescription:    board.greeting?.welcomingDescription ?? '',
-    postCreationButtonText:  board.greeting?.postCreationButtonText ?? '',
+    disableEndUserPosting:    board.disableEndUserPosting,
+    welcomingTitle:           board.greeting?.welcomingTitle           ?? DEFAULT_MESSAGES.welcomingTitle,
+    welcomingDescription:     board.greeting?.welcomingDescription     ?? DEFAULT_MESSAGES.welcomingDescription,
+    postCreationButtonText:   board.greeting?.postCreationButtonText   ?? DEFAULT_MESSAGES.postCreationButtonText,
   };
-}
-
-// ── Section heading ──────────────────────────────────────────────────────────
-
-function SectionLabel({ children, optional }: { children: React.ReactNode; optional?: boolean }) {
-  return (
-    <p className="text-sm font-semibold text-foreground">
-      {children}
-      {optional && (
-        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(Optional)</span>
-      )}
-    </p>
-  );
 }
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -154,7 +150,7 @@ interface Props {
 
 export function BoardDialog({ open, onOpenChange, board }: Props) {
   const isEdit = !!board;
-  const [form, setForm]         = useState<FormState>(emptyForm);
+  const [form, setForm]           = useState<FormState>(emptyForm);
   const [nameError, setNameError] = useState('');
 
   useEffect(() => {
@@ -180,24 +176,19 @@ export function BoardDialog({ open, onOpenChange, board }: Props) {
     if (!name) { setNameError('Please enter a name for this board.'); return; }
     setNameError('');
 
-    const hasGreeting =
-      form.welcomingTitle || form.welcomingDescription || form.postCreationButtonText;
-
     const payload: CreateBoardInput = {
       name,
-      icon:                    { type: deriveIconType(form.iconValue), value: form.iconValue || 'MessageSquare' },
-      visibility:              form.visibility,
-      defaultSorting:          form.defaultSorting,
-      allowSubscribe:          form.allowSubscribe,
+      icon:                     { type: deriveIconType(form.iconValue), value: form.iconValue || 'MessageSquare' },
+      visibility:               form.visibility,
+      defaultSorting:           form.defaultSorting,
+      allowSubscribe:           form.allowSubscribe,
       disableFollowupQuestions: form.disableFollowupQuestions,
-      disableEndUserPosting:   form.disableEndUserPosting,
-      greeting: hasGreeting
-        ? {
-            welcomingTitle:         form.welcomingTitle,
-            welcomingDescription:   form.welcomingDescription,
-            postCreationButtonText: form.postCreationButtonText,
-          }
-        : null,
+      disableEndUserPosting:    form.disableEndUserPosting,
+      greeting: {
+        welcomingTitle:         form.welcomingTitle,
+        welcomingDescription:   form.welcomingDescription,
+        postCreationButtonText: form.postCreationButtonText,
+      },
     };
 
     if (isEdit) {
@@ -243,7 +234,7 @@ export function BoardDialog({ open, onOpenChange, board }: Props) {
 
           {/* Visibility */}
           <div className="space-y-2">
-            <SectionLabel>Who can see this board?</SectionLabel>
+            <p className="text-sm font-semibold text-foreground">Who can see this board?</p>
             <div className="grid grid-cols-2 gap-3">
               <VisibilityCard
                 selected={form.visibility === 'public'}
@@ -262,77 +253,90 @@ export function BoardDialog({ open, onOpenChange, board }: Props) {
             </div>
           </div>
 
-          <Separator />
+          {/* Restrict end user actions — accordion */}
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-lg border border-border overflow-hidden mb-4"
+          >
+            <AccordionItem value="restrict" className="border-0">
+              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
+                Restrict end user actions (Optional)
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-0">
+                <p className="mb-3 text-xs text-muted-foreground mt-2">
+                  Control what regular users can do on this board.
+                </p>
+                <div className="space-y-3">
+                  <SwitchRow
+                    checked={form.disableFollowupQuestions}
+                    onChange={v => set('disableFollowupQuestions', v)}
+                    label="Skip follow-up questions"
+                    description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
+                  />
+                  <SwitchRow
+                    checked={form.disableEndUserPosting}
+                    onChange={v => set('disableEndUserPosting', v)}
+                    label="Lock posting to team members"
+                    description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-          {/* Behaviour controls */}
-          <div className="space-y-3">
-            <SectionLabel optional>Restrict end user actions</SectionLabel>
-            <p className="text-xs text-muted-foreground -mt-1">
-              These settings let you control what regular users can do on this board.
-            </p>
-
-            <SwitchRow
-              checked={form.disableFollowupQuestions}
-              onChange={v => set('disableFollowupQuestions', v)}
-              label="Skip follow-up questions"
-              description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
-            />
-
-            <SwitchRow
-              checked={form.disableEndUserPosting}
-              onChange={v => set('disableEndUserPosting', v)}
-              label="Lock posting to team members"
-              description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
-            />
-          </div>
-
-          <Separator />
-
-          {/* Greeting overrides */}
-          <div className="space-y-4">
-            <div>
-              <SectionLabel optional>Customize board messaging</SectionLabel>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Override the default welcome text shown at the top of this board. Leave blank to
-                use your global defaults.
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="bd-title">Heading text</Label>
-              <Input
-                id="bd-title"
-                placeholder="What would you like to see next?"
-                value={form.welcomingTitle}
-                onChange={e => set('welcomingTitle', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="bd-desc">Supporting description</Label>
-              <Textarea
-                id="bd-desc"
-                placeholder="Share your ideas, report bugs, or vote on what matters most to you."
-                value={form.welcomingDescription}
-                onChange={e => set('welcomingDescription', e.target.value)}
-                rows={3}
-                className="resize-none bg-muted/40"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="bd-btn">Submit button label</Label>
-              <Input
-                id="bd-btn"
-                placeholder="Share Your Idea"
-                value={form.postCreationButtonText}
-                onChange={e => set('postCreationButtonText', e.target.value)}
-              />
-            </div>
-          </div>
+          {/* Customize board messaging — accordion */}
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-lg border border-border overflow-hidden mb-4"
+          >
+            <AccordionItem value="messaging" className="border-0">
+              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
+                Customize board messaging (Optional)
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-0">
+                <p className="mb-4 text-xs text-muted-foreground mt-2">
+                  Override the default welcome text shown at the top of this board. Leave blank to
+                  use your global defaults.
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bd-title">Heading text</Label>
+                    <Input
+                      id="bd-title"
+                      placeholder={DEFAULT_MESSAGES.welcomingTitle}
+                      value={form.welcomingTitle}
+                      onChange={e => set('welcomingTitle', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bd-desc">Supporting description</Label>
+                    <Textarea
+                      id="bd-desc"
+                      placeholder={DEFAULT_MESSAGES.welcomingDescription}
+                      value={form.welcomingDescription}
+                      onChange={e => set('welcomingDescription', e.target.value)}
+                      rows={3}
+                      className="resize-none bg-muted/40"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bd-btn">Submit button label</Label>
+                    <Input
+                      id="bd-btn"
+                      placeholder={DEFAULT_MESSAGES.postCreationButtonText}
+                      value={form.postCreationButtonText}
+                      onChange={e => set('postCreationButtonText', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           {/* Footer actions */}
-          <div className="flex justify-end gap-2 border-t border-border pt-4">
+          <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="ghost" onClick={handleClose} disabled={isPending}>
               Cancel
             </Button>
