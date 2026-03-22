@@ -13,9 +13,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useDeleteBoard } from '../hooks/useDeleteBoard';
+import { useDeleteBoard }  from '../hooks/useDeleteBoard';
+import { useBoardsStore }  from '../store';
 import { BoardIconDisplay } from './BoardIconDisplay';
-import { BoardDialog } from './BoardDialog';
 import type { Board } from '../types';
 
 interface Props {
@@ -25,8 +25,8 @@ interface Props {
 }
 
 export function BoardCard({ board, dragHandleRef, dragHandleProps }: Props) {
-  const [editOpen,    setEditOpen]    = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const openEditDialog = useBoardsStore((s) => s.openEditDialog);
   const { mutate: del, isPending } = useDeleteBoard();
 
   return (
@@ -53,12 +53,11 @@ export function BoardCard({ board, dragHandleRef, dragHandleProps }: Props) {
 
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-1">
-
           <Button
             variant="ghost"
             size="sm"
             className="h-7 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
-            onClick={() => setEditOpen(true)}
+            onClick={() => openEditDialog(board)}
           >
             <Settings className="h-3.5 w-3.5" />
             <span className="text-xs">Edit</span>
@@ -81,9 +80,6 @@ export function BoardCard({ board, dragHandleRef, dragHandleProps }: Props) {
         </div>
       </div>
 
-      {/* Edit dialog */}
-      <BoardDialog open={editOpen} onOpenChange={setEditOpen} board={board} />
-
       {/* Delete confirm */}
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
@@ -98,7 +94,7 @@ export function BoardCard({ board, dragHandleRef, dragHandleProps }: Props) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => del(board.id)}
+              onClick={() => { del(board.id); setConfirmOpen(false); }}
             >
               Delete board
             </AlertDialogAction>
