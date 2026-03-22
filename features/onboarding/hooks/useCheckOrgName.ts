@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { queryKeys } from '@/lib/query-keys';
-import { authClient } from '@/lib/auth-client';
+import { checkOrgSlug } from '../api';
 
 interface Result {
   isChecking: boolean;
@@ -35,11 +35,7 @@ export function useCheckOrgName(
 
   const { data, isFetching, isError } = useQuery({
     queryKey: queryKeys.organizations.checkSlug(debouncedSlug),
-    queryFn: async () => {
-      const { data: result, error } = await authClient.organization.checkSlug({ slug: debouncedSlug });
-      if (error) return { available: false };
-      return { available: !!result?.status };
-    },
+    queryFn: () => checkOrgSlug(debouncedSlug),
     enabled: debouncedSlug.length >= 2,
     staleTime: 10_000,
   });
