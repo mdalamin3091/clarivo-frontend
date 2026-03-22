@@ -7,7 +7,7 @@ export const queryKeys = {
     list: () => ['workspaces', 'list'] as const,
   },
   organizations: {
-    checkName: (name: string) => ['organizations', 'check-name', name] as const,
+    checkSlug: (slug: string) => ['organizations', 'check-slug', slug] as const,
     active:  (orgId: string) => ['organizations', orgId] as const,
     members: (orgId: string) => ['organizations', orgId, 'members'] as const,
   },
