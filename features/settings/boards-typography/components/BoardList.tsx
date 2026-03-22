@@ -1,15 +1,32 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SortableList } from '@/shared/components/ui/SortableList';
 import { useBoards } from '../hooks/useBoards';
-import { BoardCard } from './BoardCard';
+import { useReorderBoards } from '../hooks/useReorderBoards';
+import { SortableBoardItem } from './SortableBoardItem';
 import { BoardDialog } from './BoardDialog';
+import type { Board } from '../types';
 
 export function BoardList() {
   const [createOpen, setCreateOpen] = useState(false);
-  const { data: boards, isLoading } = useBoards();
+  const { data: serverBoards, isLoading } = useBoards();
+  const { reorder } = useReorderBoards();
+
+  // Local state for optimistic reordering
+  const [boards, setBoards] = useState<Board[]>([]);
+
+  useEffect(() => {
+    if (serverBoards) setBoards(serverBoards);
+  }, [serverBoards]);
+
+  const handleReorder = (reordered: Board[]) => {
+    setBoards(reordered); // optimistic update
+    void reorder(reordered);
+  };
 
   return (
     <>
@@ -33,11 +50,20 @@ export function BoardList() {
         <div className="flex items-center justify-center py-10">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
-      ) : boards && boards.length > 0 ? (
-        <div className="mt-4 space-y-2">
-          {boards.map(board => (
-            <BoardCard key={board.id} board={board} />
-          ))}
+      ) : boards.length > 0 ? (
+        <div className="mt-4">
+          <SortableList
+            items={boards}
+            onReorder={handleReorder}
+            className="space-y-2"
+            renderItem={(board, dragHandleRef, dragHandleProps) => (
+              <SortableBoardItem
+                board={board}
+                dragHandleRef={dragHandleRef}
+                dragHandleProps={dragHandleProps}
+              />
+            )}
+          />
         </div>
       ) : (
         <div className="mt-4 rounded-lg border border-dashed border-border py-10 text-center">

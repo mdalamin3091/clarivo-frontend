@@ -24,6 +24,7 @@ export interface Board {
   allowSubscribe: boolean;
   disableFollowupQuestions: boolean;
   disableEndUserPosting: boolean;
+  order: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +40,9 @@ export interface CreateBoardInput {
   disableEndUserPosting?: boolean;
 }
 
-export interface UpdateBoardInput extends Partial<CreateBoardInput> {}
+export interface UpdateBoardInput extends Partial<CreateBoardInput> {
+  order?: number;
+}
 
 // ── Org-level board settings ──────────────────────────────────────────────────
 

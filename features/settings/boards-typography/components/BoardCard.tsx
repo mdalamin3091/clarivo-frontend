@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, X, Loader2 } from 'lucide-react';
+import { Settings, X, Loader2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -19,10 +19,12 @@ import { BoardDialog } from './BoardDialog';
 import type { Board } from '../types';
 
 interface Props {
-  board: Board;
+  board:            Board;
+  dragHandleRef?:   (el: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
-export function BoardCard({ board }: Props) {
+export function BoardCard({ board, dragHandleRef, dragHandleProps }: Props) {
   const [editOpen,    setEditOpen]    = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { mutate: del, isPending } = useDeleteBoard();
@@ -30,6 +32,17 @@ export function BoardCard({ board }: Props) {
   return (
     <>
       <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+        {/* Drag handle */}
+        {dragHandleRef && (
+          <span
+            ref={dragHandleRef}
+            {...dragHandleProps}
+            className="cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing shrink-0"
+          >
+            <GripVertical className="h-4 w-4" />
+          </span>
+        )}
+
         {/* Icon + name */}
         <div className="flex flex-1 items-center gap-2.5 min-w-0">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
