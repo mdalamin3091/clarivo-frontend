@@ -21,7 +21,8 @@ const PLANS = [
 
 export function SettingsBillingPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-8 p-6">
+    <div className="min-h-full bg-background">
+      <div className="mx-auto max-w-3xl space-y-8 p-6 pb-12">
       <div>
         <h2 className="text-lg font-semibold text-foreground">Billing</h2>
         <p className="mt-0.5 text-sm text-muted-foreground">
@@ -91,6 +92,7 @@ export function SettingsBillingPage() {
             Add card
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

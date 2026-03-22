@@ -10,7 +10,8 @@ export function SettingsMembersPage() {
   const members           = org?.members ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
+    <div className="min-h-full bg-background">
+      <div className="mx-auto max-w-3xl space-y-6 p-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Members</h2>
@@ -43,6 +44,7 @@ export function SettingsMembersPage() {
             <p className="text-xs text-muted-foreground">No members found</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

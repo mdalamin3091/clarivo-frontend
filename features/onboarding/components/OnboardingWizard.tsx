@@ -49,8 +49,10 @@ export function OnboardingWizard() {
     },
   });
 
-  const triggerSetup = () =>
+  const triggerSetup = () => {
+    if (setupOrgMutation.isPending || setupOrgMutation.isSuccess) return;
     setupOrgMutation.mutate({ modules, accessibility, orgName, teamSize });
+  };
 
   // After Google OAuth redirect, Zustand persist restores state from sessionStorage automatically
   useEffect(() => {

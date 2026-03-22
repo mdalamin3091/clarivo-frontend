@@ -123,6 +123,28 @@
 .animate-fade-in  { animation: var(--animate-fade-in); }
 
 
+/* ─── Thin scrollbar utility ───────────────────────────────────────────────── */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.scrollbar-thin:hover {
+  scrollbar-color: color-mix(in srgb, var(--foreground) 20%, transparent) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+.scrollbar-thin:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   * {
@@ -131,5 +153,6 @@
   body {
     background: var(--background);
     color: var(--foreground);
+    overflow-y: hidden;
   }
 }
