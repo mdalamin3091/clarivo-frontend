@@ -4,7 +4,8 @@ import { Key, Plus } from 'lucide-react';
 
 export function SettingsApiKeysPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
+    <div className="min-h-full bg-background">
+      <div className="mx-auto max-w-3xl space-y-6 p-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">API Keys</h2>
@@ -34,6 +35,7 @@ export function SettingsApiKeysPage() {
         <p className="mt-1 max-w-xs text-xs text-muted-foreground">
           Generate an API key to start integrating Clarivo into your own applications.
         </p>
+      </div>
       </div>
     </div>
   );

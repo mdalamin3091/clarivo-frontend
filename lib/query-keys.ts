@@ -27,6 +27,10 @@ export const queryKeys = {
     list:   (orgId: string)              => ['surveys', orgId] as const,
     detail: (orgId: string, id: string)  => ['surveys', orgId, id] as const,
   },
+  boards: {
+    list:   (orgId: string)             => ['boards', orgId] as const,
+    detail: (orgId: string, id: string) => ['boards', orgId, id] as const,
+  },
   invitations: {
     get: (id: string) => ['invitations', id] as const,
   },

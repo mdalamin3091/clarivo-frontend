@@ -18,7 +18,7 @@ export const MODULE_ICONS = [
   { label: 'Changelog', href: '/dashboard/changelog', icon: Newspaper },
   { label: 'Surveys',   href: '/dashboard/surveys',   icon: ClipboardList },
 ];
-
+  
 export const BOTTOM_ICONS = [
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2 },
@@ -179,17 +179,17 @@ export const PANEL_CONFIG: Record<string, PanelConfig> = {
             icon:        MessageSquare,
             defaultOpen: false,
             items: [
-              { label: 'Boards & Typography', href: '/dashboard/settings/modules/feedback/boards' },
-              { label: 'Roadmap',             href: '/dashboard/settings/modules/feedback/roadmap' },
-              { label: 'Statuses',            href: '/dashboard/settings/modules/feedback/statuses' },
-              { label: 'Tags',                href: '/dashboard/settings/modules/feedback/tags' },
-              { label: 'Voting',              href: '/dashboard/settings/modules/feedback/voting' },
-              { label: 'Custom Fields',       href: '/dashboard/settings/modules/feedback/custom-fields' },
-              { label: 'Access & Privacy',    href: '/dashboard/settings/modules/feedback/access' },
-              { label: 'Prioritization',      href: '/dashboard/settings/modules/feedback/prioritization' },
-              { label: 'Macros',              href: '/dashboard/settings/modules/feedback/macros' },
-              { label: 'Import / Export',     href: '/dashboard/settings/modules/feedback/import-export' },
-              { label: 'Notifications',       href: '/dashboard/settings/modules/feedback/notifications' },
+              { label: 'Boards & Typography', href: '/dashboard/settings/boards' },
+              { label: 'Roadmap',             href: '/dashboard/settings/roadmap' },
+              { label: 'Statuses',            href: '/dashboard/settings/statuses' },
+              { label: 'Tags',                href: '/dashboard/settings/tags' },
+              { label: 'Voting',              href: '/dashboard/settings/voting' },
+              { label: 'Custom Fields',       href: '/dashboard/settings/custom-fields' },
+              { label: 'Access & Privacy',    href: '/dashboard/settings/access' },
+              { label: 'Prioritization',      href: '/dashboard/settings/prioritization' },
+              { label: 'Macros',              href: '/dashboard/settings/macros' },
+              { label: 'Import / Export',     href: '/dashboard/settings/import-export' },
+              { label: 'Notifications',       href: '/dashboard/settings/notifications' },
             ],
           },
         ],

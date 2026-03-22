@@ -1,11 +1,24 @@
+import { authClient } from '@/lib/auth-client';
 import { apiFetch } from '@/lib/api';
-import type { BrandingData, BrandingFormData } from './types';
+import type { BrandingFormData } from './types';
 
-export async function updateOrgBranding(data: BrandingFormData): Promise<BrandingData> {
-  return apiFetch<BrandingData>('/api/v1/organizations/branding', {
-    method: 'PATCH',
-    body: JSON.stringify(data),
+// authClient.organization.update() data type only includes standard BA fields
+// (name, slug, logo, metadata). Custom additionalFields are passed at runtime;
+// the cast bridges the gap until inferAdditionalFields cross-project typing is wired up.
+type OrgUpdateData = Parameters<typeof authClient.organization.update>[0]['data'];
+
+export async function updateOrgBranding(organizationId: string, data: BrandingFormData): Promise<void> {
+  // Better Auth rejects null for string fields — strip nulls so omitted fields
+  // are left unchanged rather than failing validation.
+  const payload = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== null),
+  );
+
+  const { error } = await authClient.organization.update({
+    data: payload as unknown as OrgUpdateData,
+    organizationId,
   });
+  if (error) throw new Error(error.message);
 }
 
 export async function uploadBrandingImage(

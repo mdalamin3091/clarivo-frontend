@@ -4,7 +4,8 @@ import { Plus, Globe } from 'lucide-react';
 
 export function SettingsWebhooksPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
+    <div className="min-h-full bg-background">
+      <div className="mx-auto max-w-3xl space-y-6 p-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Webhooks</h2>
@@ -43,6 +44,7 @@ export function SettingsWebhooksPage() {
         <p className="mt-1 max-w-xs text-xs text-muted-foreground">
           Add a webhook endpoint URL to start receiving event notifications.
         </p>
+      </div>
       </div>
     </div>
   );

@@ -5,4 +5,5 @@ export { SetupModulesPage }      from './portal-menus/components/SetupModulesPag
 export { AccessibilityPage }     from './organization-access/components/AccessibilityPage';
 export { SettingsBillingPage }   from './billing/components/SettingsBillingPage';
 export { SettingsApiKeysPage }   from './api-keys/components/SettingsApiKeysPage';
-export { SettingsWebhooksPage }  from './webhooks/components/SettingsWebhooksPage';
+export { SettingsWebhooksPage }    from './webhooks/components/SettingsWebhooksPage';
+export { BoardsTypographyPage }    from './boards-typography/components/BoardsTypographyPage';
