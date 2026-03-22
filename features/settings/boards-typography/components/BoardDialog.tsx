@@ -259,8 +259,8 @@ export function BoardDialog({ open, onOpenChange, board }: Props) {
             collapsible
             className="rounded-lg border border-border overflow-hidden mb-4"
           >
-            <AccordionItem value="restrict" className="border-0">
-              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
+            <AccordionItem value="restrict" className="border-0 bg-muted/30">
+              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
                 Restrict end user actions (Optional)
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-0">
@@ -291,8 +291,8 @@ export function BoardDialog({ open, onOpenChange, board }: Props) {
             collapsible
             className="rounded-lg border border-border overflow-hidden mb-4"
           >
-            <AccordionItem value="messaging" className="border-0">
-              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
+            <AccordionItem value="messaging" className="border-0 bg-muted/30">
+              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
                 Customize board messaging (Optional)
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-0">
