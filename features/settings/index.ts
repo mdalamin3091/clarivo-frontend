@@ -10,3 +10,4 @@ export { BoardsTypographyPage }    from './boards-typography/components/BoardsTy
 export { StatusesPage }            from './statuses/components/StatusesPage';
 export { TagsPage }                from './tags/components/TagsPage';
 export { VotingPage }              from './voting/components/VotingPage';
+export { CustomFieldsPage }        from './custom-fields/components/CustomFieldsPage';

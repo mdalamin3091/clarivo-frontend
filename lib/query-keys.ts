@@ -37,6 +37,9 @@ export const queryKeys = {
   tags: {
     list: (orgId: string) => ['tags', orgId] as const,
   },
+  customFields: {
+    list: (orgId: string) => ['custom-fields', orgId] as const,
+  },
   invitations: {
     get: (id: string) => ['invitations', id] as const,
   },
