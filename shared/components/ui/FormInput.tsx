@@ -15,6 +15,7 @@ interface FormInputProps<T extends FieldValues> {
   name: FieldPath<T>;
   label: string;
   className?: string;
+  labelClassName?: string;
   inputClassName?: string;
   inputProps?: Omit<ComponentProps<typeof Input>, 'name' | 'className'>;
 }
@@ -31,6 +32,7 @@ export function FormInput<T extends FieldValues>({
   name,
   label,
   className,
+  labelClassName,
   inputClassName,
   inputProps,
 }: FormInputProps<T>) {
@@ -40,7 +42,7 @@ export function FormInput<T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className={labelClassName}>{label}</FormLabel>
           <FormControl>
             <Input
               {...inputProps}

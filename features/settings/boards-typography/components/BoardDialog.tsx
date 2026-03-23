@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Globe, Lock } from 'lucide-react';
 import {
   Dialog,
@@ -14,16 +16,27 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+// FormLabel is used by FormInput/FormSwitchRow internally; kept here for FormField wrappers below
 import { Button }   from '@/components/ui/button';
-import { Input }    from '@/components/ui/input';
-import { Label }    from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { IconPicker, isEmoji, isImageUrl } from '@/shared/components/ui/IconPicker';
-import { SwitchRow } from '@/shared/components/ui/SwitchRow';
-import { useCreateBoard } from '../hooks/useCreateBoard';
-import { useUpdateBoard }  from '../hooks/useUpdateBoard';
-import { useBoardsStore }  from '../store';
-import type { Board, BoardSorting, BoardVisibility, CreateBoardInput } from '../types';
+import { FormInput }     from '@/shared/components/ui/FormInput';
+import { FormSwitchRow } from '@/shared/components/ui/FormSwitchRow';
+import { useCreateBoard }    from '../hooks/useCreateBoard';
+import { useUpdateBoard }    from '../hooks/useUpdateBoard';
+import { useOrgCustomFields } from '../hooks/useOrgCustomFields';
+import { useBoardsStore }    from '../store';
+import { TYPE_LABELS }       from '../constants/customFieldLabels';
+import { boardFormSchema, type BoardFormValues } from '../validation';
+import type { Board } from '../types';
 import { cn } from '@/lib/utils';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -33,7 +46,41 @@ function deriveIconType(value: string): 'predefined' | 'emoji' {
   return 'predefined';
 }
 
-// ── Visibility option card ───────────────────────────────────────────────────
+const DEFAULT_MESSAGES = {
+  welcomingTitle:         'What would you like to see next?',
+  welcomingDescription:   'Share your ideas, report bugs, or vote on what matters most to you.',
+  postCreationButtonText: 'Share Your Idea',
+};
+
+const DEFAULT_VALUES: BoardFormValues = {
+  name:                     '',
+  iconValue:                'MessageSquare',
+  visibility:               'public',
+  defaultSorting:           'trending',
+  allowSubscribe:           true,
+  disableFollowupQuestions: false,
+  disableEndUserPosting:    false,
+  customFieldIds:           [],
+  ...DEFAULT_MESSAGES,
+};
+
+function boardToValues(board: Board): BoardFormValues {
+  return {
+    name:                     board.name,
+    iconValue:                board.icon.value,
+    visibility:               board.visibility,
+    defaultSorting:           board.defaultSorting,
+    allowSubscribe:           board.allowSubscribe,
+    disableFollowupQuestions: board.disableFollowupQuestions,
+    disableEndUserPosting:    board.disableEndUserPosting,
+    customFieldIds:           board.customFields.map(f => f.id),
+    welcomingTitle:           board.greeting?.welcomingTitle         ?? DEFAULT_MESSAGES.welcomingTitle,
+    welcomingDescription:     board.greeting?.welcomingDescription   ?? DEFAULT_MESSAGES.welcomingDescription,
+    postCreationButtonText:   board.greeting?.postCreationButtonText ?? DEFAULT_MESSAGES.postCreationButtonText,
+  };
+}
+
+// ── Visibility card ───────────────────────────────────────────────────────────
 
 interface VisibilityCardProps {
   selected:    boolean;
@@ -69,99 +116,46 @@ function VisibilityCard({ selected, onSelect, icon, title, description }: Visibi
   );
 }
 
-// ── Form state ───────────────────────────────────────────────────────────────
-
-interface FormState {
-  name:                     string;
-  iconValue:                string;
-  visibility:               BoardVisibility;
-  defaultSorting:           BoardSorting;
-  allowSubscribe:           boolean;
-  disableFollowupQuestions: boolean;
-  disableEndUserPosting:    boolean;
-  welcomingTitle:           string;
-  welcomingDescription:     string;
-  postCreationButtonText:   string;
-}
-
-const DEFAULT_MESSAGES = {
-  welcomingTitle:         'What would you like to see next?',
-  welcomingDescription:   'Share your ideas, report bugs, or vote on what matters most to you.',
-  postCreationButtonText: 'Share Your Idea',
-};
-
-function emptyForm(): FormState {
-  return {
-    name:                     '',
-    iconValue:                'MessageSquare',
-    visibility:               'public',
-    defaultSorting:           'trending',
-    allowSubscribe:           true,
-    disableFollowupQuestions: false,
-    disableEndUserPosting:    false,
-    ...DEFAULT_MESSAGES,
-  };
-}
-
-function boardToForm(board: Board): FormState {
-  return {
-    name:                     board.name,
-    iconValue:                board.icon.value,
-    visibility:               board.visibility,
-    defaultSorting:           board.defaultSorting,
-    allowSubscribe:           board.allowSubscribe,
-    disableFollowupQuestions: board.disableFollowupQuestions,
-    disableEndUserPosting:    board.disableEndUserPosting,
-    welcomingTitle:           board.greeting?.welcomingTitle           ?? DEFAULT_MESSAGES.welcomingTitle,
-    welcomingDescription:     board.greeting?.welcomingDescription     ?? DEFAULT_MESSAGES.welcomingDescription,
-    postCreationButtonText:   board.greeting?.postCreationButtonText   ?? DEFAULT_MESSAGES.postCreationButtonText,
-  };
-}
-
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function BoardDialog() {
   const { dialogOpen, editingBoard, closeDialog } = useBoardsStore();
   const isEdit = !!editingBoard;
-  const [form, setForm]           = useState<FormState>(emptyForm);
-  const [nameError, setNameError] = useState('');
 
+  const form = useForm<BoardFormValues>({
+    resolver:      zodResolver(boardFormSchema),
+    defaultValues: DEFAULT_VALUES,
+  });
+
+  // Reset form whenever dialog opens
   useEffect(() => {
     if (dialogOpen) {
-      setForm(isEdit ? boardToForm(editingBoard) : emptyForm());
-      setNameError('');
+      form.reset(editingBoard ? boardToValues(editingBoard) : DEFAULT_VALUES);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
 
-  const handleClose = closeDialog;
-
   const { mutate: create, isPending: creating } = useCreateBoard();
-  const { mutate: update, isPending: updating }  = useUpdateBoard();
+  const { mutate: update, isPending: updating  } = useUpdateBoard();
   const isPending = creating || updating;
 
-  const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
-    setForm(prev => ({ ...prev, [key]: value }));
+  const { data: orgCustomFields = [] } = useOrgCustomFields();
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const name = form.name.trim();
-    if (!name) { setNameError('Please enter a name for this board.'); return; }
-    setNameError('');
-
-    const payload: CreateBoardInput = {
-      name,
-      icon:                     { type: deriveIconType(form.iconValue), value: form.iconValue || 'MessageSquare' },
-      visibility:               form.visibility,
-      defaultSorting:           form.defaultSorting,
-      allowSubscribe:           form.allowSubscribe,
-      disableFollowupQuestions: form.disableFollowupQuestions,
-      disableEndUserPosting:    form.disableEndUserPosting,
+  const onSubmit = (data: BoardFormValues) => {
+    const payload = {
+      name:                     data.name,
+      icon:                     { type: deriveIconType(data.iconValue), value: data.iconValue || 'MessageSquare' },
+      visibility:               data.visibility,
+      defaultSorting:           data.defaultSorting,
+      allowSubscribe:           data.allowSubscribe,
+      disableFollowupQuestions: data.disableFollowupQuestions,
+      disableEndUserPosting:    data.disableEndUserPosting,
       greeting: {
-        welcomingTitle:         form.welcomingTitle,
-        welcomingDescription:   form.welcomingDescription,
-        postCreationButtonText: form.postCreationButtonText,
+        welcomingTitle:         data.welcomingTitle,
+        welcomingDescription:   data.welcomingDescription,
+        postCreationButtonText: data.postCreationButtonText,
       },
+      customFieldIds: data.customFieldIds,
     };
 
     if (isEdit) {
@@ -185,140 +179,247 @@ export function BoardDialog() {
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-2 space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 space-y-6">
 
-          {/* Name & icon */}
-          <div className="space-y-1.5">
-            <Label>Board name &amp; icon</Label>
-            <div className="flex items-center gap-2">
-              <IconPicker
-                value={form.iconValue}
-                onChange={v => set('iconValue', v || 'MessageSquare')}
-              />
-              <Input
-                placeholder="e.g. Bug Reports"
-                value={form.name}
-                onChange={e => { set('name', e.target.value); if (nameError) setNameError(''); }}
-                className="flex-1"
-              />
-            </div>
-            {nameError && <p className="text-xs text-destructive">{nameError}</p>}
-          </div>
+            {/* Name & icon */}
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium leading-none">Board name &amp; icon</p>
+              <div className="flex items-center gap-2">
 
-          {/* Visibility */}
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-foreground">Who can see this board?</p>
-            <div className="grid grid-cols-2 gap-3">
-              <VisibilityCard
-                selected={form.visibility === 'public'}
-                onSelect={() => set('visibility', 'public')}
-                icon={<Globe className="h-4 w-4" />}
-                title="Public"
-                description="Visible to everyone — including users who visit your public portal."
-              />
-              <VisibilityCard
-                selected={form.visibility === 'private'}
-                onSelect={() => set('visibility', 'private')}
-                icon={<Lock className="h-4 w-4" />}
-                title="Team only"
-                description="Visible only to members of your organization. Great for internal tracking."
-              />
-            </div>
-          </div>
+                {/* Icon picker — custom UI wired to RHF */}
+                <FormField
+                  control={form.control}
+                  name="iconValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <IconPicker
+                          value={field.value}
+                          onChange={v => field.onChange(v || 'MessageSquare')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-          {/* Restrict end user actions — accordion */}
-          <Accordion
-            type="single"
-            collapsible
-            className="rounded-lg border border-border overflow-hidden mb-4"
-          >
-            <AccordionItem value="restrict" className="border-0 bg-muted/30">
-              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
-                Restrict end user actions (Optional)
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-0">
-                <p className="mb-3 text-xs text-muted-foreground mt-2">
-                  Control what regular users can do on this board.
-                </p>
-                <div className="space-y-3">
-                  <SwitchRow
-                    checked={form.disableFollowupQuestions}
-                    onChange={v => set('disableFollowupQuestions', v)}
-                    label="Skip follow-up questions"
-                    description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
-                  />
-                  <SwitchRow
-                    checked={form.disableEndUserPosting}
-                    onChange={v => set('disableEndUserPosting', v)}
-                    label="Lock posting to team members"
-                    description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
+                {/* Name */}
+                <div className="flex-1">
+                  <FormInput
+                    control={form.control}
+                    name="name"
+                    label="Board name"
+                    labelClassName="sr-only"
+                    inputProps={{ placeholder: 'e.g. Bug Reports' }}
                   />
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              </div>
+            </div>
 
-          {/* Customize board messaging — accordion */}
-          <Accordion
-            type="single"
-            collapsible
-            className="rounded-lg border border-border overflow-hidden mb-4"
-          >
-            <AccordionItem value="messaging" className="border-0 bg-muted/30">
-              <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
-                Customize board messaging (Optional)
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-0">
-                <p className="mb-4 text-xs text-muted-foreground mt-2">
-                  Override the default welcome text shown at the top of this board. Leave blank to
-                  use your global defaults.
-                </p>
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bd-title">Heading text</Label>
-                    <Input
-                      id="bd-title"
-                      placeholder={DEFAULT_MESSAGES.welcomingTitle}
-                      value={form.welcomingTitle}
-                      onChange={e => set('welcomingTitle', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bd-desc">Supporting description</Label>
-                    <Textarea
-                      id="bd-desc"
-                      placeholder={DEFAULT_MESSAGES.welcomingDescription}
-                      value={form.welcomingDescription}
-                      onChange={e => set('welcomingDescription', e.target.value)}
-                      rows={3}
-                      className="resize-none bg-muted/40"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bd-btn">Submit button label</Label>
-                    <Input
-                      id="bd-btn"
-                      placeholder={DEFAULT_MESSAGES.postCreationButtonText}
-                      value={form.postCreationButtonText}
-                      onChange={e => set('postCreationButtonText', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+            {/* Visibility */}
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Who can see this board?</FormLabel>
+                  <FormControl>
+                    <div className="grid grid-cols-2 gap-3">
+                      <VisibilityCard
+                        selected={field.value === 'public'}
+                        onSelect={() => field.onChange('public')}
+                        icon={<Globe className="h-4 w-4" />}
+                        title="Public"
+                        description="Visible to everyone — including users who visit your public portal."
+                      />
+                      <VisibilityCard
+                        selected={field.value === 'private'}
+                        onSelect={() => field.onChange('private')}
+                        icon={<Lock className="h-4 w-4" />}
+                        title="Team only"
+                        description="Visible only to members of your organization. Great for internal tracking."
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Footer actions */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={handleClose} disabled={isPending}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? 'Save changes' : 'Create board'}
-            </Button>
-          </div>
-        </form>
+            {/* Restrict end user actions */}
+            <Accordion
+              type="single"
+              collapsible
+              className="rounded-lg border border-border overflow-hidden"
+            >
+              <AccordionItem value="restrict" className="border-0 bg-muted/30">
+                <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
+                  Restrict end user actions (Optional)
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-0">
+                  <p className="mb-3 text-xs text-muted-foreground mt-2">
+                    Control what regular users can do on this board.
+                  </p>
+                  <div className="space-y-3">
+                    <FormSwitchRow
+                      control={form.control}
+                      name="disableFollowupQuestions"
+                      label="Skip follow-up questions"
+                      description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
+                    />
+                    <FormSwitchRow
+                      control={form.control}
+                      name="disableEndUserPosting"
+                      label="Lock posting to team members"
+                      description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            {/* Customize board messaging */}
+            <Accordion
+              type="single"
+              collapsible
+              className="rounded-lg border border-border overflow-hidden"
+            >
+              <AccordionItem value="messaging" className="border-0 bg-muted/30">
+                <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
+                  Customize board messaging (Optional)
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-0">
+                  <p className="mb-4 text-xs text-muted-foreground mt-2">
+                    Override the default welcome text shown at the top of this board. Leave blank to
+                    use your global defaults.
+                  </p>
+                  <div className="space-y-4">
+                    <FormInput
+                      control={form.control}
+                      name="welcomingTitle"
+                      label="Heading text"
+                      inputProps={{ placeholder: DEFAULT_MESSAGES.welcomingTitle }}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="welcomingDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Supporting description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={DEFAULT_MESSAGES.welcomingDescription}
+                              rows={3}
+                              className="resize-none bg-muted/40"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormInput
+                      control={form.control}
+                      name="postCreationButtonText"
+                      label="Submit button label"
+                      inputProps={{ placeholder: DEFAULT_MESSAGES.postCreationButtonText }}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            {/* Custom fields */}
+            <FormField
+              control={form.control}
+              name="customFieldIds"
+              render={({ field }) => (
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="rounded-lg border border-border overflow-hidden"
+                >
+                  <AccordionItem value="custom-fields" className="border-0 bg-muted/30">
+                    <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
+                      Custom fields (optional)
+                      {field.value.length > 0 && (
+                        <span className="ml-auto mr-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          {field.value.length} selected
+                        </span>
+                      )}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4 pt-0">
+                      {orgCustomFields.length === 0 ? (
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          No custom fields yet. Create some in{' '}
+                          <span className="font-medium">Settings → Custom Fields</span>.
+                        </p>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Select which custom fields users must fill in when submitting a post to this board.
+                          </p>
+                          {orgCustomFields.map((cf) => {
+                            const checked = field.value.includes(cf.id);
+                            const toggle  = () => field.onChange(
+                              checked
+                                ? field.value.filter((x: string) => x !== cf.id)
+                                : [...field.value, cf.id],
+                            );
+                            return (
+                              <button
+                                key={cf.id}
+                                type="button"
+                                onClick={toggle}
+                                className={cn(
+                                  'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all',
+                                  checked
+                                    ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                                    : 'border-border bg-muted/20 hover:border-muted-foreground/30 hover:bg-muted/40',
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                                    checked
+                                      ? 'border-primary bg-primary text-primary-foreground'
+                                      : 'border-muted-foreground/40 bg-background',
+                                  )}
+                                >
+                                  {checked && (
+                                    <svg viewBox="0 0 12 12" className="h-3 w-3 fill-current">
+                                      <path d="M10 3L5 8.5 2 5.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="flex-1 text-sm font-medium text-foreground">{cf.name}</span>
+                                <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
+                                  {TYPE_LABELS[cf.type] ?? cf.type}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              )}
+            />
+
+            {/* Footer actions */}
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="ghost" onClick={closeDialog} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isEdit ? 'Save changes' : 'Create board'}
+              </Button>
+            </div>
+
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
