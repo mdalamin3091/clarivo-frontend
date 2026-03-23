@@ -9,3 +9,4 @@ export { SettingsWebhooksPage }    from './webhooks/components/SettingsWebhooksP
 export { BoardsTypographyPage }    from './boards-typography/components/BoardsTypographyPage';
 export { StatusesPage }            from './statuses/components/StatusesPage';
 export { TagsPage }                from './tags/components/TagsPage';
+export { VotingPage }              from './voting/components/VotingPage';

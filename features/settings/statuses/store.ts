@@ -20,6 +20,7 @@ interface StatusesStore {
   patchStatus:     (id: string, updates: Partial<Status>) => void;
   removeStatus:    (id: string) => void;
   setDefaultStatus:(id: string) => void;
+  reorderStatuses: (statuses: Status[]) => void;
 }
 
 export const useStatusesStore = create<StatusesStore>((set) => ({
@@ -49,4 +50,6 @@ export const useStatusesStore = create<StatusesStore>((set) => ({
     set((state) => ({
       statuses: state.statuses.map((s) => ({ ...s, isDefault: s.id === id })),
     })),
+
+  reorderStatuses: (statuses) => set({ statuses }),
 }));

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Trash2, Star, Loader2 } from 'lucide-react';
+import { GripVertical, Pencil, Trash2, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -25,10 +25,12 @@ import { useSetDefaultStatus } from '../hooks/useSetDefaultStatus';
 import type { Status } from '../types';
 
 interface Props {
-  status: Status;
+  status:           Status;
+  dragHandleRef?:   (el: HTMLElement | null) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
-export function StatusRow({ status }: Props) {
+export function StatusRow({ status, dragHandleRef, dragHandleProps }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const openEditDialog = useStatusesStore((s) => s.openEditDialog);
 
@@ -38,6 +40,17 @@ export function StatusRow({ status }: Props) {
   return (
     <>
       <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+        {/* Drag handle */}
+        {dragHandleRef && (
+          <span
+            ref={dragHandleRef}
+            {...dragHandleProps}
+            className="cursor-grab text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </span>
+        )}
+
         {/* Color dot */}
         <span
           className="h-3 w-3 shrink-0 rounded-full"
