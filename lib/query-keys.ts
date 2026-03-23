@@ -15,9 +15,9 @@ export const queryKeys = {
     list:   (orgId: string)              => ['feedback', orgId, 'posts'] as const,
     detail: (orgId: string, id: string)  => ['feedback', orgId, 'posts', id] as const,
   },
-  roadmap: {
-    list:   (orgId: string)              => ['roadmap', orgId, 'items'] as const,
-    detail: (orgId: string, id: string)  => ['roadmap', orgId, 'items', id] as const,
+  roadmaps: {
+    list:   (orgId: string)             => ['roadmaps', orgId] as const,
+    detail: (orgId: string, id: string) => ['roadmaps', orgId, id] as const,
   },
   changelog: {
     list:   (orgId: string)              => ['changelog', orgId, 'entries'] as const,

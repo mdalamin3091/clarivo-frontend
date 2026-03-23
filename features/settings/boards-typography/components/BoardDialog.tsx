@@ -10,12 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { SectionAccordion } from '@/shared/components/ui/SectionAccordion';
 import {
   Form,
   FormControl,
@@ -247,163 +242,128 @@ export function BoardDialog() {
             />
 
             {/* Restrict end user actions */}
-            <Accordion
-              type="single"
-              collapsible
-              className="rounded-lg border border-border overflow-hidden"
-            >
-              <AccordionItem value="restrict" className="border-0 bg-muted/30">
-                <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
-                  Restrict end user actions (Optional)
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 pt-0">
-                  <p className="mb-3 text-xs text-muted-foreground mt-2">
-                    Control what regular users can do on this board.
-                  </p>
-                  <div className="space-y-3">
-                    <FormSwitchRow
-                      control={form.control}
-                      name="disableFollowupQuestions"
-                      label="Skip follow-up questions"
-                      description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
-                    />
-                    <FormSwitchRow
-                      control={form.control}
-                      name="disableEndUserPosting"
-                      label="Lock posting to team members"
-                      description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <SectionAccordion title="Restrict end user actions (Optional)">
+              <p className="mb-3 text-xs text-muted-foreground mt-2">
+                Control what regular users can do on this board.
+              </p>
+              <div className="space-y-3">
+                <FormSwitchRow
+                  control={form.control}
+                  name="disableFollowupQuestions"
+                  label="Skip follow-up questions"
+                  description="After a user upvotes a post, Clarivo normally asks them a few quick questions. Turn this off to keep things simple."
+                />
+                <FormSwitchRow
+                  control={form.control}
+                  name="disableEndUserPosting"
+                  label="Lock posting to team members"
+                  description="Only your team can submit new posts. Users can still browse, vote, and leave comments."
+                />
+              </div>
+            </SectionAccordion>
 
             {/* Customize board messaging */}
-            <Accordion
-              type="single"
-              collapsible
-              className="rounded-lg border border-border overflow-hidden"
-            >
-              <AccordionItem value="messaging" className="border-0 bg-muted/30">
-                <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
-                  Customize board messaging (Optional)
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 pt-0">
-                  <p className="mb-4 text-xs text-muted-foreground mt-2">
-                    Override the default welcome text shown at the top of this board. Leave blank to
-                    use your global defaults.
-                  </p>
-                  <div className="space-y-4">
-                    <FormInput
-                      control={form.control}
-                      name="welcomingTitle"
-                      label="Heading text"
-                      inputProps={{ placeholder: DEFAULT_MESSAGES.welcomingTitle }}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="welcomingDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Supporting description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder={DEFAULT_MESSAGES.welcomingDescription}
-                              rows={3}
-                              className="resize-none bg-muted/40"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormInput
-                      control={form.control}
-                      name="postCreationButtonText"
-                      label="Submit button label"
-                      inputProps={{ placeholder: DEFAULT_MESSAGES.postCreationButtonText }}
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <SectionAccordion title="Customize board messaging (Optional)">
+              <p className="mb-4 text-xs text-muted-foreground mt-2">
+                Override the default welcome text shown at the top of this board. Leave blank to
+                use your global defaults.
+              </p>
+              <div className="space-y-4">
+                <FormInput
+                  control={form.control}
+                  name="welcomingTitle"
+                  label="Heading text"
+                  inputProps={{ placeholder: DEFAULT_MESSAGES.welcomingTitle }}
+                />
+                <FormField
+                  control={form.control}
+                  name="welcomingDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Supporting description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={DEFAULT_MESSAGES.welcomingDescription}
+                          rows={3}
+                          className="resize-none bg-muted/40"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormInput
+                  control={form.control}
+                  name="postCreationButtonText"
+                  label="Submit button label"
+                  inputProps={{ placeholder: DEFAULT_MESSAGES.postCreationButtonText }}
+                />
+              </div>
+            </SectionAccordion>
 
             {/* Custom fields */}
             <FormField
               control={form.control}
               name="customFieldIds"
               render={({ field }) => (
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="rounded-lg border border-border overflow-hidden"
+                <SectionAccordion
+                  title="Custom fields (optional)"
+                  badge={field.value.length > 0 ? `${field.value.length} selected` : undefined}
                 >
-                  <AccordionItem value="custom-fields" className="border-0 bg-muted/30">
-                    <AccordionTrigger className="px-4 py-3 text-sm font-semibold text-foreground hover:no-underline bg-muted/50 hover:bg-muted data-[state=open]:bg-muted/20">
-                      Custom fields (optional)
-                      {field.value.length > 0 && (
-                        <span className="ml-auto mr-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                          {field.value.length} selected
-                        </span>
-                      )}
-                    </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4 pt-0">
-                      {orgCustomFields.length === 0 ? (
-                        <p className="mt-3 text-xs text-muted-foreground">
-                          No custom fields yet. Create some in{' '}
-                          <span className="font-medium">Settings → Custom Fields</span>.
-                        </p>
-                      ) : (
-                        <div className="mt-3 space-y-2">
-                          <p className="text-xs text-muted-foreground mb-3">
-                            Select which custom fields users must fill in when submitting a post to this board.
-                          </p>
-                          {orgCustomFields.map((cf) => {
-                            const checked = field.value.includes(cf.id);
-                            const toggle  = () => field.onChange(
+                  {orgCustomFields.length === 0 ? (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      No custom fields yet. Create some in{' '}
+                      <span className="font-medium">Settings → Custom Fields</span>.
+                    </p>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Select which custom fields users must fill in when submitting a post to this board.
+                      </p>
+                      {orgCustomFields.map((cf) => {
+                        const checked = field.value.includes(cf.id);
+                        const toggle  = () => field.onChange(
+                          checked
+                            ? field.value.filter((x: string) => x !== cf.id)
+                            : [...field.value, cf.id],
+                        );
+                        return (
+                          <button
+                            key={cf.id}
+                            type="button"
+                            onClick={toggle}
+                            className={cn(
+                              'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all',
                               checked
-                                ? field.value.filter((x: string) => x !== cf.id)
-                                : [...field.value, cf.id],
-                            );
-                            return (
-                              <button
-                                key={cf.id}
-                                type="button"
-                                onClick={toggle}
-                                className={cn(
-                                  'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all',
-                                  checked
-                                    ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                                    : 'border-border bg-muted/20 hover:border-muted-foreground/30 hover:bg-muted/40',
-                                )}
-                              >
-                                <span
-                                  className={cn(
-                                    'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
-                                    checked
-                                      ? 'border-primary bg-primary text-primary-foreground'
-                                      : 'border-muted-foreground/40 bg-background',
-                                  )}
-                                >
-                                  {checked && (
-                                    <svg viewBox="0 0 12 12" className="h-3 w-3 fill-current">
-                                      <path d="M10 3L5 8.5 2 5.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="flex-1 text-sm font-medium text-foreground">{cf.name}</span>
-                                <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
-                                  {TYPE_LABELS[cf.type] ?? cf.type}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                                ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                                : 'border-border bg-muted/20 hover:border-muted-foreground/30 hover:bg-muted/40',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                                checked
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : 'border-muted-foreground/40 bg-background',
+                              )}
+                            >
+                              {checked && (
+                                <svg viewBox="0 0 12 12" className="h-3 w-3 fill-current">
+                                  <path d="M10 3L5 8.5 2 5.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </span>
+                            <span className="flex-1 text-sm font-medium text-foreground">{cf.name}</span>
+                            <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
+                              {TYPE_LABELS[cf.type] ?? cf.type}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </SectionAccordion>
               )}
             />
 
