@@ -131,7 +131,9 @@ export function RoadmapColumnItem({
                   <FormItem>
                     <FormLabel>Color</FormLabel>
                     <FormControl>
+                      <div className='max-w-9/12'>
                       <ColorSwatchPicker value={field.value} onChange={field.onChange} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
