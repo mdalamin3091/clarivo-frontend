@@ -11,3 +11,4 @@ export { StatusesPage }            from './statuses/components/StatusesPage';
 export { TagsPage }                from './tags/components/TagsPage';
 export { VotingPage }              from './voting/components/VotingPage';
 export { CustomFieldsPage }        from './custom-fields/components/CustomFieldsPage';
+export { AccessPrivacyPage }       from './privacy-access/components/AccessPrivacyPage';
