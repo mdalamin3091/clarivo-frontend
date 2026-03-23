@@ -7,3 +7,7 @@ export { SettingsBillingPage }   from './billing/components/SettingsBillingPage'
 export { SettingsApiKeysPage }   from './api-keys/components/SettingsApiKeysPage';
 export { SettingsWebhooksPage }    from './webhooks/components/SettingsWebhooksPage';
 export { BoardsTypographyPage }    from './boards-typography/components/BoardsTypographyPage';
+export { StatusesPage }            from './statuses/components/StatusesPage';
+export { TagsPage }                from './tags/components/TagsPage';
+export { VotingPage }              from './voting/components/VotingPage';
+export { CustomFieldsPage }        from './custom-fields/components/CustomFieldsPage';
