@@ -12,6 +12,12 @@ export interface BoardGreeting {
   postCreationButtonText: string;
 }
 
+export interface BoardCustomField {
+  id:   string;
+  name: string;
+  type: string;
+}
+
 export interface Board {
   id: string;
   organizationId: string;
@@ -25,6 +31,7 @@ export interface Board {
   disableFollowupQuestions: boolean;
   disableEndUserPosting: boolean;
   order: number;
+  customFields: BoardCustomField[];
   createdAt: string;
   updatedAt: string;
 }
@@ -38,10 +45,12 @@ export interface CreateBoardInput {
   allowSubscribe?: boolean;
   disableFollowupQuestions?: boolean;
   disableEndUserPosting?: boolean;
+  customFieldIds?: string[];
 }
 
 export interface UpdateBoardInput extends Partial<CreateBoardInput> {
-  order?: number;
+  order?:          number;
+  customFieldIds?: string[];
 }
 
 // ── Org-level board settings ──────────────────────────────────────────────────
