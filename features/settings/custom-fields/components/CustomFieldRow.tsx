@@ -1,10 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  GripVertical, Pencil, Trash2, Loader2,
-  Type, Hash, Link, Calendar, ToggleLeft, ChevronDown, ListChecks,
-} from 'lucide-react';
+import { GripVertical, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -16,23 +13,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useCustomFieldsStore } from '../store';
+import { useCustomFieldsStore }  from '../store';
 import { useDeleteCustomField }  from '../hooks/useDeleteCustomField';
-import type { CustomField, CustomFieldType } from '../types';
-
-// ── Type meta ─────────────────────────────────────────────────────────────────
-
-const TYPE_META: Record<CustomFieldType, { label: string; icon: React.ReactNode }> = {
-  text:        { label: 'Text',        icon: <Type       className="h-3 w-3" /> },
-  number:      { label: 'Number',      icon: <Hash       className="h-3 w-3" /> },
-  url:         { label: 'URL',         icon: <Link       className="h-3 w-3" /> },
-  date:        { label: 'Date',        icon: <Calendar   className="h-3 w-3" /> },
-  boolean:     { label: 'Switch',      icon: <ToggleLeft className="h-3 w-3" /> },
-  dropdown:    { label: 'Dropdown',    icon: <ChevronDown className="h-3 w-3" /> },
-  multiselect: { label: 'Multi-select',icon: <ListChecks className="h-3 w-3" /> },
-};
-
-// ── Props ─────────────────────────────────────────────────────────────────────
+import { TYPE_META }             from '../constants';
+import type { CustomField } from '../types';
 
 interface Props {
   field:            CustomField;
@@ -45,7 +29,7 @@ export function CustomFieldRow({ field, dragHandleRef, dragHandleProps }: Props)
   const openEditDialog = useCustomFieldsStore((s) => s.openEditDialog);
   const { mutate: del, isPending: deleting } = useDeleteCustomField();
 
-  const meta = TYPE_META[field.type];
+  const { label, Icon } = TYPE_META[field.type];
 
   return (
     <>
@@ -63,8 +47,8 @@ export function CustomFieldRow({ field, dragHandleRef, dragHandleProps }: Props)
 
         {/* Type badge */}
         <span className="flex shrink-0 items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-          {meta.icon}
-          {meta.label}
+          <Icon className="h-3 w-3" />
+          {label}
         </span>
 
         {/* Name */}

@@ -34,6 +34,7 @@ export interface CreateCustomFieldInput {
 
 export interface UpdateCustomFieldInput {
   name?:                string;
+  type?:                CustomFieldType;
   options?:             string[];
   placeholder?:         string;
   isRequired?:          boolean;
