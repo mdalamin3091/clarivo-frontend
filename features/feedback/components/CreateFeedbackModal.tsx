@@ -1,35 +1,33 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ChevronRight, LayoutGrid, X, Tag, User, CalendarDays } from 'lucide-react';
-import type { JSONContent } from 'novel';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useSession } from '@/lib/auth-client';
-import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { RichEditor } from '@/shared/components/editor';
-import { SearchableSelect } from '@/shared/components/ui/SearchableSelect';
-import { MultiSearchableSelect } from '@/shared/components/ui/MultiSearchableSelect';
-import { cn } from '@/lib/utils';
-import { useFeedbackModalStore } from '../store';
-import { useCreateFeedback } from '../hooks/useCreateFeedback';
-import { useOrgBoards } from '../hooks/useOrgBoards';
-import { useOrgStatuses } from '../hooks/useOrgStatuses';
-import { useOrgTags } from '../hooks/useOrgTags';
-import { useOrgMembers } from '../hooks/useOrgMembers';
+import { useState, useEffect } from "react";
+import { ChevronRight, LayoutGrid, X, Tag, User } from "lucide-react";
+import type { JSONContent } from "novel";
+import { toast } from "sonner";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useSession } from "@/lib/auth-client";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { RichEditor } from "@/shared/components/editor";
+import { SearchableSelect } from "@/shared/components/ui/SearchableSelect";
+import { MultiSearchableSelect } from "@/shared/components/ui/MultiSearchableSelect";
+import { DatePicker } from "@/shared/components/ui/DatePicker";
+import { cn } from "@/lib/utils";
+import { useFeedbackModalStore } from "../store";
+import { useCreateFeedback } from "../hooks/useCreateFeedback";
+import { useOrgBoards } from "../hooks/useOrgBoards";
+import { useOrgStatuses } from "../hooks/useOrgStatuses";
+import { useOrgTags } from "../hooks/useOrgTags";
+import { useOrgMembers } from "../hooks/useOrgMembers";
 
 // ─── Validation schema ────────────────────────────────────────────────────────
 
 const schema = z.object({
-  title:      z.string().min(1, 'Please enter a title for your post.'),
-  boardId:    z.string().min(1, 'Please select a board.'),
+  title: z.string().min(1, "Please enter a title for your post."),
+  boardId: z.string().min(1, "Please select a board."),
   createMore: z.boolean(),
 });
 
@@ -39,10 +37,10 @@ type FormValues = z.infer<typeof schema>;
 
 function UserAvatar({ name }: { name: string }) {
   const initials = name
-    .split(' ')
+    .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
-    .join('')
+    .join("")
     .toUpperCase();
 
   return (
@@ -52,80 +50,24 @@ function UserAvatar({ name }: { name: string }) {
   );
 }
 
-// ─── EtaPicker ───────────────────────────────────────────────────────────────
-
-function EtaPicker({
-  value,
-  onChange,
-}: {
-  value: Date | undefined;
-  onChange: (date: Date | undefined) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            'flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1.5',
-            'text-xs font-medium transition-colors hover:bg-accent',
-            value ? 'text-foreground' : 'text-muted-foreground',
-          )}
-        >
-          <CalendarDays className="h-3.5 w-3.5" />
-          {value ? format(value, 'MMM d, yyyy') : 'Set ETA'}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        side="top"
-        sideOffset={6}
-        className="w-auto p-0"
-      >
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={(date) => {
-            onChange(date);
-            setOpen(false);
-          }}
-          disabled={{ before: new Date() }}
-          autoFocus
-        />
-        {value && (
-          <div className="border-t border-border px-3 py-2">
-            <button
-              type="button"
-              onClick={() => { onChange(undefined); setOpen(false); }}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors"
-            >
-              Clear date
-            </button>
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 // ─── CreateFeedbackModal ──────────────────────────────────────────────────────
 
 export function CreateFeedbackModal() {
   const { isOpen, close } = useFeedbackModalStore();
-  const { data: session }  = useSession();
+  const { data: session } = useSession();
 
-  const { data: boards   = [] } = useOrgBoards();
+  const { data: boards = [] } = useOrgBoards();
   const { data: statuses = [] } = useOrgStatuses();
-  const { data: tags     = [] } = useOrgTags();
-  const { data: members  = [] } = useOrgMembers();
+  const { data: tags = [] } = useOrgTags();
+  const { data: members = [] } = useOrgMembers();
 
-  const [description, setDescription] = useState<JSONContent | undefined>(undefined);
-  const [statusId,    setStatusId]    = useState<string | null>(null);
-  const [tagIds,      setTagIds]      = useState<string[]>([]);
+  const [description, setDescription] = useState<JSONContent | undefined>(
+    undefined,
+  );
+  const [statusId, setStatusId] = useState<string | null>(null);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
-  const [eta,         setEta]         = useState<Date | undefined>(undefined);
+  const [eta, setEta] = useState<Date | undefined>(undefined);
 
   const {
     register,
@@ -136,12 +78,12 @@ export function CreateFeedbackModal() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: '', boardId: '', createMore: false },
+    defaultValues: { title: "", boardId: "", createMore: false },
   });
 
   // Pre-select first board when boards load
   useEffect(() => {
-    if (boards.length > 0) setValue('boardId', boards[0].id);
+    if (boards.length > 0) setValue("boardId", boards[0].id);
   }, [boards, setValue]);
 
   // Pre-select default status when statuses load
@@ -152,7 +94,10 @@ export function CreateFeedbackModal() {
     }
   }, [statuses, statusId]);
 
-  const [boardId, createMore] = useWatch({ control, name: ['boardId', 'createMore'] });
+  const [boardId, createMore] = useWatch({
+    control,
+    name: ["boardId", "createMore"],
+  });
 
   const { mutate: createPost, isPending } = useCreateFeedback();
 
@@ -168,16 +113,19 @@ export function CreateFeedbackModal() {
     }
   }, [isOpen, reset]);
 
-  const userName = session?.user?.name ?? 'User';
+  const userName = session?.user?.name ?? "User";
 
   // ── Option maps ────────────────────────────────────────────────────────────
 
   const boardOptions = boards.map((b) => ({
     value: b.id,
     label: b.name,
-    icon: b.icon?.type === 'emoji'
-      ? <span className="text-sm">{b.icon.value}</span>
-      : <LayoutGrid className="h-3.5 w-3.5 text-primary" />,
+    icon:
+      b.icon?.type === "emoji" ? (
+        <span className="text-sm">{b.icon.value}</span>
+      ) : (
+        <LayoutGrid className="h-3.5 w-3.5 text-primary" />
+      ),
   }));
 
   const statusOptions = statuses.map((s) => ({
@@ -194,10 +142,10 @@ export function CreateFeedbackModal() {
 
   const memberOptions = members.map((m) => ({
     value: m.id,
-    label: m.user?.name ?? m.user?.email ?? 'Unknown',
+    label: m.user?.name ?? m.user?.email ?? "Unknown",
     icon: (
       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
-        {(m.user?.name ?? '?')[0].toUpperCase()}
+        {(m.user?.name ?? "?")[0].toUpperCase()}
       </span>
     ),
   }));
@@ -206,7 +154,9 @@ export function CreateFeedbackModal() {
 
   const resetSelections = () => {
     setDescription(undefined);
-    setStatusId(statuses.find((s) => s.isDefault)?.id ?? statuses[0]?.id ?? null);
+    setStatusId(
+      statuses.find((s) => s.isDefault)?.id ?? statuses[0]?.id ?? null,
+    );
     setTagIds([]);
     setAssigneeIds([]);
     setEta(undefined);
@@ -215,26 +165,26 @@ export function CreateFeedbackModal() {
   const onSubmit = (data: FormValues) => {
     createPost(
       {
-        boardId:     data.boardId,
-        title:       data.title,
-        description: description ? JSON.stringify(description) : '',
-        ...(statusId        ? { statusId }              : {}),
-        ...(tagIds.length   ? { tagIds }                : {}),
-        ...(assigneeIds.length ? { assigneeIds }        : {}),
+        boardId: data.boardId,
+        title: data.title,
+        description: description ? JSON.stringify(description) : "",
+        ...(statusId ? { statusId } : {}),
+        ...(tagIds.length ? { tagIds } : {}),
+        ...(assigneeIds.length ? { assigneeIds } : {}),
       },
       {
         onSuccess: () => {
-          toast.success('Post created successfully.');
+          toast.success("Post created successfully.");
           if (data.createMore) {
             reset();
-            if (boards.length > 0) setValue('boardId', boards[0].id);
+            if (boards.length > 0) setValue("boardId", boards[0].id);
             resetSelections();
           } else {
             close();
           }
         },
         onError: () => {
-          toast.error('Failed to create post. Please try again.');
+          toast.error("Failed to create post. Please try again.");
         },
       },
     );
@@ -253,11 +203,11 @@ export function CreateFeedbackModal() {
             <SearchableSelect
               options={boardOptions}
               value={boardId}
-              onChange={(id) => id && setValue('boardId', id)}
+              onChange={(id) => id && setValue("boardId", id)}
               placeholder="Select board"
               searchPlaceholder="Search boards…"
               clearable={false}
-              side='left'
+              side="left"
               triggerClassName="rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium"
             />
           </div>
@@ -275,17 +225,21 @@ export function CreateFeedbackModal() {
           {/* Title */}
           <div className="px-5">
             <input
-              {...register('title')}
+              {...register("title")}
               type="text"
               placeholder="Title of your post"
               className="w-full bg-transparent text-xl font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
               autoFocus
             />
             {errors.title && (
-              <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {errors.title.message}
+              </p>
             )}
             {errors.boardId && (
-              <p className="mt-1 text-xs text-destructive">{errors.boardId.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {errors.boardId.message}
+              </p>
             )}
           </div>
 
@@ -353,7 +307,14 @@ export function CreateFeedbackModal() {
               />
 
               {/* ETA */}
-              <EtaPicker value={eta} onChange={setEta} />
+              <DatePicker
+                value={eta}
+                onChange={setEta}
+                placeholder="Set ETA"
+                disabled={{ before: new Date() }}
+                side="top"
+                align="start"
+              />
             </div>
 
             {/* Right: create more + submit */}
@@ -361,7 +322,7 @@ export function CreateFeedbackModal() {
               <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground select-none">
                 <Switch
                   checked={createMore}
-                  onCheckedChange={(val) => setValue('createMore', val)}
+                  onCheckedChange={(val) => setValue("createMore", val)}
                   className="scale-90"
                 />
                 Create more
@@ -370,11 +331,11 @@ export function CreateFeedbackModal() {
                 type="submit"
                 disabled={isPending}
                 className={cn(
-                  'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity',
-                  'hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50',
+                  "rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity",
+                  "hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
                 )}
               >
-                {isPending ? 'Submitting…' : 'Submit Post'}
+                {isPending ? "Submitting…" : "Submit Post"}
               </button>
             </div>
           </div>
