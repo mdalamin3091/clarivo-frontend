@@ -5,10 +5,11 @@ import { useActiveOrganization } from '@/lib/auth-client';
 import { apiFetch } from '@/lib/api';
 import { queryKeys } from '@/lib/query-keys';
 
-interface StatusOption {
-  id:    string;
-  name:  string;
-  color: string;
+export interface StatusOption {
+  id:        string;
+  name:      string;
+  color:     string;
+  isDefault: boolean;
 }
 
 export function useOrgStatuses() {

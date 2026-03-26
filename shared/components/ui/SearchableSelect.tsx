@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/role-has-required-aria-props */
 'use client';
 
 import { useState } from 'react';
@@ -14,14 +13,14 @@ import {
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Shared Types ─────────────────────────────────────────────────────────────
 
 export interface SelectOption {
   value: string;
   label: string;
-  /** CSS color string rendered as a dot indicator (e.g. '#22c55e') */
+  /** CSS color for the dot indicator (e.g. '#22c55e') */
   color?: string;
-  /** Icon element rendered instead of the color dot */
+  /** Icon rendered instead of the color dot */
   icon?: React.ReactNode;
 }
 
@@ -32,25 +31,23 @@ export interface SearchableSelectProps {
   onChange: (value: string | null) => void;
   /** Trigger button text when nothing is selected */
   placeholder?: string;
-  /** Command input placeholder */
+  /** Search input placeholder */
   searchPlaceholder?: string;
-  /** Replace the default pill trigger entirely */
+  /** Replaces the default pill trigger */
   trigger?: React.ReactNode;
-  /** Clicking the already-selected item clears the selection (default true) */
+  /** Re-clicking the selected item deselects it (default: true) */
   clearable?: boolean;
   /** Extra classes on the default trigger button */
   triggerClassName?: string;
-  /** Popover alignment relative to trigger */
   align?: 'start' | 'center' | 'end';
-  /** Popover side relative to trigger */
   side?: 'top' | 'bottom' | 'left' | 'right';
-  /** Min-width of the dropdown panel (default 200) */
+  /** Min-width of the dropdown panel in px (default: 200) */
   minWidth?: number;
 }
 
-// ─── ColorDot ─────────────────────────────────────────────────────────────────
+// ─── Shared Primitives ────────────────────────────────────────────────────────
 
-function ColorDot({ color }: { color: string }) {
+export function ColorDot({ color }: { color: string }) {
   return (
     <span
       className="inline-block h-2 w-2 shrink-0 rounded-full"
@@ -59,7 +56,7 @@ function ColorDot({ color }: { color: string }) {
   );
 }
 
-// ─── SearchableSelect ─────────────────────────────────────────────────────────
+// ─── SearchableSelect (single) ────────────────────────────────────────────────
 
 export function SearchableSelect({
   options,
@@ -87,16 +84,17 @@ export function SearchableSelect({
     setOpen(false);
   };
 
-  // ── Default trigger ──────────────────────────────────────────────────────────
   const defaultTrigger = (
     <button
       type="button"
       role="combobox"
       aria-expanded={open}
       aria-haspopup="listbox"
+      aria-controls="searchable-select-list"
       className={cn(
         'flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1.5',
         'text-xs font-medium text-foreground transition-colors hover:bg-accent',
+        selected && 'border-primary/40',
         triggerClassName,
       )}
     >
@@ -114,9 +112,7 @@ export function SearchableSelect({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {trigger ?? defaultTrigger}
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{trigger ?? defaultTrigger}</PopoverTrigger>
 
       <PopoverContent
         side={side}
@@ -126,43 +122,33 @@ export function SearchableSelect({
         className="overflow-hidden rounded-xl border border-border p-0 shadow-xl"
       >
         <Command>
-          {/* Search input — cmdk handles focus automatically */}
           <CommandInput placeholder={searchPlaceholder} autoFocus />
-
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-
             <CommandGroup>
-              {options.map((option) => {
-                const isSelected = option.value === value;
-                return (
-                  <CommandItem
-                    key={option.value}
-                    value={option.label}   // cmdk filters on this string
-                    onSelect={() => handleSelect(option.value)}
-                    className="cursor-pointer gap-2.5 px-3 py-2 text-sm text-muted-foreground"
-                  >
-                    {/* Dot or icon */}
-                    {option.icon ? (
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                        {option.icon}
-                      </span>
-                    ) : option.color ? (
-                      <ColorDot color={option.color} />
-                    ) : null}
-
-                    <span className="flex-1">{option.label}</span>
-
-                    {/* Checkmark */}
-                    <Check
-                      className={cn(
-                        'h-3.5 w-3.5 shrink-0 text-primary transition-opacity',
-                        isSelected ? 'opacity-100' : 'opacity-0',
-                      )}
-                    />
-                  </CommandItem>
-                );
-              })}
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => handleSelect(option.value)}
+                  className="cursor-pointer gap-2.5 px-3 py-2 text-sm text-muted-foreground"
+                >
+                  {option.icon ? (
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                      {option.icon}
+                    </span>
+                  ) : option.color ? (
+                    <ColorDot color={option.color} />
+                  ) : null}
+                  <span className="flex-1">{option.label}</span>
+                  <Check
+                    className={cn(
+                      'h-3.5 w-3.5 shrink-0 text-primary transition-opacity',
+                      option.value === value ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                </CommandItem>
+              ))}
             </CommandGroup>
           </CommandList>
         </Command>
