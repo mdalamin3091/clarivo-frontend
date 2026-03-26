@@ -145,6 +145,43 @@
   background: color-mix(in srgb, var(--foreground) 20%, transparent);
 }
 
+/* ─── Novel / ProseMirror editor styles ────────────────────────────────────── */
+.ProseMirror {
+  outline: none;
+}
+
+/*
+ * Placeholder — shown only when the entire editor is empty.
+ * Tiptap adds BOTH `is-empty` AND `is-editor-empty` only when
+ * isEmptyDoc === true, so targeting both classes prevents the
+ * placeholder from appearing on every empty paragraph mid-document.
+ * `showOnlyCurrent: false` ensures it shows without requiring focus.
+ */
+.ProseMirror .is-empty.is-editor-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Drag handle from tiptap-extension-global-drag-handle */
+.global-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: var(--muted-foreground);
+  cursor: grab;
+  transition: background-color 0.15s;
+}
+.global-drag-handle:hover {
+  background-color: var(--accent);
+  color: var(--foreground);
+}
+
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   * {
