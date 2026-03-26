@@ -6,6 +6,8 @@ import { Bold, Italic, List, Link, ImageIcon, Video, Paperclip } from 'lucide-re
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EmojiButton } from './EmojiButton';
+import { toast } from 'sonner';
+import { uploadEditorImage, uploadEditorFile } from '../utils/uploadAsset';
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -64,27 +66,33 @@ export function BottomToolbar({ onAttach, onImageInsert }: BottomToolbarProps) {
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => {
+          onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            onImageInsert?.(file);
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              editor.chain().focus().setImage({ src: ev.target?.result as string }).run();
-            };
-            reader.readAsDataURL(file);
             e.target.value = '';
+            try {
+              const src = await uploadEditorImage(file);
+              editor.chain().focus().setImage({ src }).run();
+              onImageInsert?.(file);
+            } catch {
+              toast.error('Failed to upload image. Please try again.');
+            }
           }}
         />
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          onChange={(e) => {
+          onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            onAttach?.(file);
             e.target.value = '';
+            try {
+              await uploadEditorFile(file);
+              onAttach?.(file);
+            } catch {
+              toast.error('Failed to upload file. Please try again.');
+            }
           }}
         />
 

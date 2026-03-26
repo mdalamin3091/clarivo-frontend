@@ -1,12 +1,16 @@
 'use client';
 
+import { useRef } from 'react';
 import { EditorRoot, EditorContent, handleCommandNavigation } from 'novel';
+import type { EditorInstance } from 'novel';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { buildExtensions } from './editor.config';
 import { SlashCommandMenu } from './extensions/slash-command';
 import { SelectionBubble } from './components/bubble/SelectionBubble';
 import { BottomToolbar } from './components/BottomToolbar';
 import type { RichEditorProps } from './editor.types';
+import { uploadEditorImage } from './utils/uploadAsset';
 
 export function RichEditor({
   value,
@@ -19,6 +23,7 @@ export function RichEditor({
 }: RichEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extensions = buildExtensions(placeholder) as any[];
+  const editorRef = useRef<EditorInstance | null>(null);
 
   return (
     <div
@@ -33,9 +38,32 @@ export function RichEditor({
           extensions={extensions}
           editable={editable}
           className="flex-1"
+          onCreate={({ editor }) => {
+            editorRef.current = editor;
+          }}
           editorProps={{
             handleKeyDown: (_view: unknown, event: KeyboardEvent) =>
               handleCommandNavigation(event) ?? false,
+            handlePaste: (_view: unknown, event: ClipboardEvent) => {
+              const items = Array.from(event.clipboardData?.items ?? []);
+              const imageItem = items.find((item) => item.type.startsWith('image/'));
+              if (!imageItem) return false;
+
+              const file = imageItem.getAsFile();
+              if (!file) return false;
+
+              // Prevent Tiptap's default paste (which embeds base64)
+              uploadEditorImage(file)
+                .then((src) => {
+                  editorRef.current?.chain().focus().setImage({ src }).run();
+                  onImageInsert?.(file);
+                })
+                .catch(() => {
+                  toast.error('Failed to upload pasted image. Please try again.');
+                });
+
+              return true;
+            },
             attributes: {
               class: [
                 'prose prose-sm dark:prose-invert max-w-none',
@@ -53,7 +81,10 @@ export function RichEditor({
               ].join(' '),
             },
           }}
-          onUpdate={({ editor }) => onChange?.(editor.getJSON())}
+          onUpdate={({ editor }) => {
+            editorRef.current = editor;
+            onChange?.(editor.getJSON());
+          }}
         >
           <SlashCommandMenu />
           <SelectionBubble />

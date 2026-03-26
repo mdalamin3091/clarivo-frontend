@@ -27,6 +27,8 @@ import {
   Youtube as YoutubeIcon,
 } from 'lucide-react';
 import { createElement } from 'react';
+import { toast } from 'sonner';
+import { uploadEditorImage } from './utils/uploadAsset';
 
 const lowlight = createLowlight(common);
 
@@ -135,18 +137,16 @@ export const SLASH_COMMAND_ITEMS = createSuggestionItems([
       editor.chain().focus().deleteRange(range).run();
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = 'image/*,video/*';
-      input.onchange = (e) => {
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const src = ev.target?.result as string;
-          if (file.type.startsWith('image/')) {
-            editor.chain().focus().setImage({ src }).run();
-          }
-        };
-        reader.readAsDataURL(file);
+        try {
+          const src = await uploadEditorImage(file);
+          editor.chain().focus().setImage({ src }).run();
+        } catch {
+          toast.error('Failed to upload image. Please try again.');
+        }
       };
       input.click();
     },
