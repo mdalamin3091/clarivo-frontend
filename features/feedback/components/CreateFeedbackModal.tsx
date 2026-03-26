@@ -218,9 +218,9 @@ export function CreateFeedbackModal() {
         boardId:     data.boardId,
         title:       data.title,
         description: description ? JSON.stringify(description) : '',
-        ...(statusId          ? { statusId }                 : {}),
-        ...(tagIds.length     ? { tagId: tagIds[0] }         : {}),
-        ...(assigneeIds.length? { assigneeId: assigneeIds[0] }: {}),
+        ...(statusId        ? { statusId }              : {}),
+        ...(tagIds.length   ? { tagIds }                : {}),
+        ...(assigneeIds.length ? { assigneeIds }        : {}),
       },
       {
         onSuccess: () => {
@@ -321,11 +321,11 @@ export function CreateFeedbackModal() {
                 searchPlaceholder="Search tags…"
                 side="bottom"
                 maxDisplay={0}
+                tooltip="Add tag"
                 trigger={
                   <button
                     type="button"
                     className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                    title="Add tag"
                   >
                     <Tag className="h-3.5 w-3.5" />
                   </button>
@@ -341,11 +341,11 @@ export function CreateFeedbackModal() {
                 searchPlaceholder="Search members…"
                 side="bottom"
                 maxDisplay={0}
+                tooltip="Assign owner"
                 trigger={
                   <button
                     type="button"
                     className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                    title="Assign owner"
                   >
                     <User className="h-3.5 w-3.5" />
                   </button>

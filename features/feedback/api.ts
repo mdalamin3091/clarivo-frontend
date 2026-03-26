@@ -13,12 +13,22 @@ export async function getOrgBoards(): Promise<BoardOption[]> {
 }
 
 export async function getFeedbackPosts(_orgId: string, init?: RequestInit): Promise<FeedbackPost[]> {
-  const data = await apiFetch<{ feedbacks: FeedbackPost[] }>('/api/v1/feedback', init);
-  return data.feedbacks;
+  const data = await apiFetch<{ feedbacks: FeedbackPost[]; total: number; page: number; limit: number }>(
+    '/api/v1/feedback',
+    init,
+  );
+  return Array.isArray(data.feedbacks) ? data.feedbacks : [];
 }
 
 export async function createFeedbackPost(
-  data: { boardId: string; title: string; description: string },
+  data: {
+    boardId:     string;
+    title:       string;
+    description: string;
+    statusId?:   string;
+    tagIds?:     string[];
+    assigneeIds?: string[];
+  },
 ): Promise<FeedbackPost> {
   return apiFetch<FeedbackPost>('/api/v1/feedback', {
     method: 'POST',
