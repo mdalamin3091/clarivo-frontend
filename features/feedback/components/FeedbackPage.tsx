@@ -264,7 +264,7 @@ export function FeedbackPage() {
       </div>
 
       <CreateFeedbackModal />
-      <FeedbackEditDrawer />
+      <FeedbackEditDrawer showOverlay={false} />
     </>
   );
 }

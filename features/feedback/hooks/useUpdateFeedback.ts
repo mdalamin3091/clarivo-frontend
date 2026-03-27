@@ -22,6 +22,7 @@ export function useUpdateFeedback() {
         assigneeIds?:    string[];
         eta?:            string | null;
         postVisibility?: 'public' | 'private';
+        enableComment?:  boolean;
       };
     }) => updateFeedbackPost(id, data),
     onSuccess: () => {

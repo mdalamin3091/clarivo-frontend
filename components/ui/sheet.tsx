@@ -29,6 +29,8 @@ SheetOverlay.displayName = 'SheetOverlay';
 
 interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   side?: 'top' | 'bottom' | 'left' | 'right';
+  /** Whether to render the backdrop overlay. Defaults to true. */
+  showOverlay?: boolean;
 }
 
 const sideVariants: Record<string, string> = {
@@ -41,9 +43,9 @@ const sideVariants: Record<string, string> = {
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
+>(({ side = 'right', showOverlay = true, className, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
+    {showOverlay && <SheetOverlay />}
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
