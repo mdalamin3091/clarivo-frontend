@@ -8,7 +8,7 @@ import { PAGE_TITLES, PANEL_ROUTES } from '../constants/navigation';
 
 export function Topbar() {
   const pathname = usePathname();
-  const { toggleSidebar } = useUIStore();
+  const { toggleSidebar, topbarNode } = useUIStore();
 
   const title    = PAGE_TITLES[pathname] ?? 'Dashboard';
   const hasPanel = PANEL_ROUTES.some((r) => pathname.startsWith(r));
@@ -28,7 +28,8 @@ export function Topbar() {
         <h1 className="text-sm font-semibold text-foreground">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
+        {topbarNode}
         <ThemeToggle />
       </div>
     </header>

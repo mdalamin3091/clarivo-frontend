@@ -20,6 +20,29 @@ export async function getFeedbackPosts(_orgId: string, init?: RequestInit): Prom
   return Array.isArray(data.feedbacks) ? data.feedbacks : [];
 }
 
+export async function updateFeedbackPost(
+  id: string,
+  data: {
+    title?:       string;
+    description?: string;
+    boardId?:     string;
+    statusId?:    string | null;
+    tagIds?:      string[];
+    assigneeIds?: string[];
+    eta?:         string | null;
+    postVisibility?: 'public' | 'private';
+  },
+): Promise<FeedbackPost> {
+  return apiFetch<FeedbackPost>(`/api/v1/feedback/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteFeedbackPost(id: string): Promise<void> {
+  await apiFetch(`/api/v1/feedback/${id}`, { method: 'DELETE' });
+}
+
 export async function createFeedbackPost(
   data: {
     boardId:     string;
