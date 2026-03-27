@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api';
-import type { FeedbackPost } from './types';
+import type { FeedbackPost, FeedbackDetail, CommentResponse } from './types';
 
 interface BoardOption {
   id:   string;
@@ -58,4 +58,56 @@ export async function createFeedbackPost(
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export async function getFeedbackDetail(id: string): Promise<FeedbackDetail> {
+  const data = await apiFetch<{ feedback: FeedbackDetail }>(`/api/v1/feedback/${id}`);
+  return data.feedback;
+}
+
+// ── Comment API ───────────────────────────────────────────────────────────────
+
+export async function addComment(
+  feedbackId: string,
+  body: { content: unknown; parentId?: string },
+): Promise<CommentResponse[]> {
+  const data = await apiFetch<{ comments: CommentResponse[] }>(
+    `/api/v1/feedback/${feedbackId}/comments`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
+  return data.comments;
+}
+
+export async function updateComment(
+  feedbackId: string,
+  commentId:  string,
+  body:       { content: unknown },
+): Promise<CommentResponse[]> {
+  const data = await apiFetch<{ comments: CommentResponse[] }>(
+    `/api/v1/feedback/${feedbackId}/comments/${commentId}`,
+    { method: 'PATCH', body: JSON.stringify(body) },
+  );
+  return data.comments;
+}
+
+export async function deleteComment(
+  feedbackId: string,
+  commentId:  string,
+): Promise<CommentResponse[]> {
+  const data = await apiFetch<{ comments: CommentResponse[] }>(
+    `/api/v1/feedback/${feedbackId}/comments/${commentId}`,
+    { method: 'DELETE' },
+  );
+  return data.comments;
+}
+
+export async function toggleCommentVote(
+  feedbackId: string,
+  commentId:  string,
+  body:       { type: 'upvote' | 'downvote' },
+): Promise<{ upvotes: number; downvotes: number; myVote: 'upvote' | 'downvote' | null }> {
+  return apiFetch(
+    `/api/v1/feedback/${feedbackId}/comments/${commentId}/vote`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
 }

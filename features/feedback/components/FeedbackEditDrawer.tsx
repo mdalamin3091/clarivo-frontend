@@ -14,7 +14,6 @@ import {
   FileText,
   Calendar,
   SlidersHorizontal,
-  Send,
   Pin,
   Link2,
 } from 'lucide-react';
@@ -48,7 +47,11 @@ import { useOrgStatuses } from '../hooks/useOrgStatuses';
 import { useOrgTags } from '../hooks/useOrgTags';
 import { useOrgMembers } from '../hooks/useOrgMembers';
 import { useFeedbackPosts } from '../hooks/useFeedbackPosts';
-import { useActiveOrganization } from '@/lib/auth-client';
+import { useGetFeedback } from '../hooks/useGetFeedback';
+import { useAddComment } from '../hooks/useAddComment';
+import { useActiveOrganization, useSession } from '@/lib/auth-client';
+import { CommentList } from './CommentList';
+import { CommentInput } from './CommentInput';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -137,6 +140,7 @@ interface FeedbackEditDrawerProps {
 export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerProps) {
   const { drawerOpen, drawerPostId, closeDrawer, openDrawer } = useFeedbackModalStore();
   const { data: org }        = useActiveOrganization();
+  const { data: session }    = useSession();
   const { data: posts = [] } = useFeedbackPosts(org?.id);
 
   const currentIndex = posts.findIndex((p) => p.id === drawerPostId);
@@ -144,13 +148,23 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
   const prevPost     = currentIndex > 0 ? posts[currentIndex - 1] : null;
   const nextPost     = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
 
+  // Fetch full detail (includes comments) when drawer is open
+  const { data: detail } = useGetFeedback(drawerOpen ? drawerPostId : null);
+
   const { data: boards = [] }   = useOrgBoards();
   const { data: statuses = [] } = useOrgStatuses();
   const { data: tags = [] }     = useOrgTags();
   const { data: members = [] }  = useOrgMembers();
 
+  // Resolve current user's member record for permission checks
+  const currentUserId    = session?.user?.id ?? null;
+  const currentMember    = members.find((m) => m.userId === currentUserId) ?? null;
+  const currentMemberId  = currentMember?.id ?? null;
+  const isAdmin          = currentMember?.role === 'admin' || currentMember?.role === 'owner';
+
   const { mutate: updatePost, isPending: isSaving }   = useUpdateFeedback();
   const { mutate: deletePost, isPending: isDeleting } = useDeleteFeedback();
+  const { mutate: addComment, isPending: isAddingComment } = useAddComment(drawerPostId ?? '');
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [title, setTitle]                   = useState('');
@@ -162,7 +176,6 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
   const [eta, setEta]                       = useState<Date | undefined>(undefined);
   const [visibility, setVisibility]         = useState<'public' | 'private'>('public');
   const [enableComment, setEnableComment]   = useState(true);
-  const [comment, setComment]               = useState<JSONContent | undefined>(undefined);
   const [pinned, setPinned]                 = useState(false);
 
   // Populate fields when post changes
@@ -176,7 +189,6 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
     setVisibility(post.postVisibility);
     setEnableComment(post.enableComment);
     setPinned(!!post.pinnedAt);
-    setComment(undefined);
     setEta(undefined);
     try {
       if (post.description && typeof post.description === 'string') {
@@ -255,10 +267,15 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
       .then(() => toast.success('Link copied.'));
   };
 
-  const handleAddComment = () => {
-    if (!comment) return;
-    toast.info('Comment submitted (API coming soon).');
-    setComment(undefined);
+  const handleAddComment = (content: JSONContent) => {
+    if (!drawerPostId) return;
+    addComment(
+      { content },
+      {
+        onSuccess: () => toast.success('Comment added.'),
+        onError:   () => toast.error('Failed to add comment.'),
+      },
+    );
   };
 
   const authorName  = post?.author?.user?.name ?? 'Unknown';
@@ -542,35 +559,28 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
                         Comments
                       </span>
                     }
-                    badge={post.commentCount > 0 ? String(post.commentCount) : undefined}
+                    badge={
+                      (detail?.comments?.length ?? post.commentCount) > 0
+                        ? String(detail?.comments?.length ?? post.commentCount)
+                        : undefined
+                    }
                     defaultOpen={false}
                     contentClassName="px-4 pt-2 pb-4"
                   >
                     <div className="space-y-3">
-                      {post.commentCount === 0 && (
-                        <p className="text-xs text-muted-foreground pb-1">No comments yet.</p>
-                      )}
-                      <div className="space-y-2">
-                        <RichEditor
-                          value={comment}
-                          onChange={setComment}
+                      <CommentList
+                        comments={detail?.comments ?? []}
+                        feedbackId={post.id}
+                        currentMemberId={currentMemberId}
+                        isAdmin={isAdmin}
+                      />
+                      <div className="border-t border-border/50 pt-3">
+                        <CommentInput
+                          key={post.id}
+                          onSubmit={handleAddComment}
+                          isLoading={isAddingComment}
                           placeholder="Write a comment…"
-                          className="min-h-24 rounded-xl border border-border bg-muted/20 [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2.5 [&_.ProseMirror]:min-h-16"
                         />
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={handleAddComment}
-                            disabled={!comment}
-                            className={cn(
-                              'flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground',
-                              'transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
-                            )}
-                          >
-                            <Send className="h-3 w-3" />
-                            Add Comment
-                          </button>
-                        </div>
                       </div>
                     </div>
                   </SectionAccordion>

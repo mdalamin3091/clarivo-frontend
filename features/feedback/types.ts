@@ -36,6 +36,7 @@ export interface FeedbackPost {
   postVisibility: 'public' | 'private';
   enableComment:  boolean;
   pinnedAt:       string | null;
+  eta:            string | null;
   createdAt:      string;
   updatedAt:      string;
   author:         FeedbackAuthor;
@@ -45,4 +46,32 @@ export interface FeedbackPost {
   votes:          FeedbackVotes;
   myVote:         'upvote' | 'downvote' | null;
   commentCount:   number;
+}
+
+// ─── Comment ──────────────────────────────────────────────────────────────────
+
+export interface CommentVotes {
+  upvotes:   number;
+  downvotes: number;
+}
+
+export interface CommentResponse {
+  id:         string;
+  feedbackId: string;
+  authorId:   string;
+  parentId:   string | null;
+  content:    unknown;
+  isEdited:   boolean;
+  createdAt:  string;
+  updatedAt:  string;
+  author:     FeedbackAuthor;
+  votes:      CommentVotes;
+  myVote:     'upvote' | 'downvote' | null;
+  replies:    CommentResponse[];
+}
+
+// ─── FeedbackDetail — list item + nested comment tree ─────────────────────────
+
+export interface FeedbackDetail extends FeedbackPost {
+  comments: CommentResponse[];
 }
