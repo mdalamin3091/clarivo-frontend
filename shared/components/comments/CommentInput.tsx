@@ -13,6 +13,7 @@ interface CommentInputProps {
   placeholder?:  string;
   initialValue?: JSONContent;
   submitLabel?:  string;
+  autoFocus?:    boolean;
 }
 
 export function CommentInput({
@@ -24,19 +25,21 @@ export function CommentInput({
   submitLabel = 'Comment',
 }: CommentInputProps) {
   const [content, setContent] = useState<JSONContent | undefined>(initialValue);
-
-  const hasContent = !!content;
+  const [resetKey, setResetKey] = useState(0);
 
   const handleSubmit = () => {
     if (!content || isLoading) return;
     onSubmit(content);
-    if (!initialValue) setContent(undefined);
+    if (!initialValue) {
+      setContent(undefined);
+      setResetKey((k) => k + 1);
+    }
   };
 
   return (
     <div className="space-y-2">
       <RichEditor
-        key={initialValue ? JSON.stringify(initialValue).slice(0, 32) : 'new'}
+        key={initialValue ? JSON.stringify(initialValue).slice(0, 32) : `new-comment-${resetKey}`}
         value={content}
         onChange={setContent}
         placeholder={placeholder}
@@ -56,7 +59,7 @@ export function CommentInput({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={!hasContent || isLoading}
+          disabled={!content || isLoading}
           className={cn(
             'flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground',
             'transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',

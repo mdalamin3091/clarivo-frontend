@@ -49,9 +49,12 @@ import { useOrgMembers } from '../hooks/useOrgMembers';
 import { useFeedbackPosts } from '../hooks/useFeedbackPosts';
 import { useGetFeedback } from '../hooks/useGetFeedback';
 import { useAddComment } from '../hooks/useAddComment';
+import { useUpdateComment } from '../hooks/useUpdateComment';
+import { useDeleteComment } from '../hooks/useDeleteComment';
+import { useToggleCommentVote } from '../hooks/useToggleCommentVote';
 import { useActiveOrganization, useSession } from '@/lib/auth-client';
-import { CommentList } from './CommentList';
-import { CommentInput } from './CommentInput';
+import { CommentThread } from '@/shared/components/comments';
+import type { CommentData } from '@/shared/components/comments';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -158,13 +161,21 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
 
   // Resolve current user's member record for permission checks
   const currentUserId    = session?.user?.id ?? null;
+  const currentUserName  = session?.user?.name ?? 'Unknown';
   const currentMember    = members.find((m) => m.userId === currentUserId) ?? null;
   const currentMemberId  = currentMember?.id ?? null;
   const isAdmin          = currentMember?.role === 'admin' || currentMember?.role === 'owner';
 
-  const { mutate: updatePost, isPending: isSaving }   = useUpdateFeedback();
-  const { mutate: deletePost, isPending: isDeleting } = useDeleteFeedback();
-  const { mutate: addComment, isPending: isAddingComment } = useAddComment(drawerPostId ?? '');
+  const authorInfo = currentMember && currentUserId
+    ? { memberId: currentMember.id, role: currentMember.role, userId: currentUserId, name: currentUserName }
+    : null;
+
+  const { mutate: updatePost,   isPending: isSaving }          = useUpdateFeedback();
+  const { mutate: deletePost,   isPending: isDeleting }         = useDeleteFeedback();
+  const { mutate: addComment,   isPending: isAddingComment }    = useAddComment(drawerPostId ?? '', authorInfo);
+  const { mutate: editComment }                                  = useUpdateComment(drawerPostId ?? '');
+  const { mutate: removeComment }                                = useDeleteComment(drawerPostId ?? '');
+  const { mutate: voteComment }                                  = useToggleCommentVote(drawerPostId ?? '');
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [title, setTitle]                   = useState('');
@@ -267,14 +278,29 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
       .then(() => toast.success('Link copied.'));
   };
 
-  const handleAddComment = (content: JSONContent) => {
+  const handleAddComment = (content: JSONContent, parentId?: string) => {
     if (!drawerPostId) return;
     addComment(
-      { content },
-      {
-        onSuccess: () => toast.success('Comment added.'),
-        onError:   () => toast.error('Failed to add comment.'),
-      },
+      { content, parentId },
+      { onError: () => toast.error('Failed to add comment.') },
+    );
+  };
+
+  const handleEditComment = (commentId: string, content: JSONContent) => {
+    editComment(
+      { commentId, content },
+      { onError: () => toast.error('Failed to update comment.') },
+    );
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    removeComment(commentId, { onError: () => toast.error('Failed to delete comment.') });
+  };
+
+  const handleVoteComment = (commentId: string, type: 'upvote' | 'downvote') => {
+    voteComment(
+      { commentId, type },
+      { onError: () => toast.error('Failed to update vote.') },
     );
   };
 
@@ -567,22 +593,16 @@ export function FeedbackEditDrawer({ showOverlay = false }: FeedbackEditDrawerPr
                     defaultOpen={false}
                     contentClassName="px-4 pt-2 pb-4"
                   >
-                    <div className="space-y-3">
-                      <CommentList
-                        comments={detail?.comments ?? []}
-                        feedbackId={post.id}
-                        currentMemberId={currentMemberId}
-                        isAdmin={isAdmin}
-                      />
-                      <div className="border-t border-border/50 pt-3">
-                        <CommentInput
-                          key={post.id}
-                          onSubmit={handleAddComment}
-                          isLoading={isAddingComment}
-                          placeholder="Write a comment…"
-                        />
-                      </div>
-                    </div>
+                    <CommentThread
+                      comments={(detail?.comments ?? []) as CommentData[]}
+                      currentMemberId={currentMemberId}
+                      isAdmin={isAdmin}
+                      onAdd={handleAddComment}
+                      onEdit={handleEditComment}
+                      onDelete={handleDeleteComment}
+                      onVote={handleVoteComment}
+                      isPendingAdd={isAddingComment}
+                    />
                   </SectionAccordion>
                 )}
               </div>
