@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import type { JSONContent } from 'novel';
-import { cn } from '@/lib/utils';
 import type { CommentData } from './types';
 import { CommentRow } from './CommentRow';
 import { CommentInput } from './CommentInput';
@@ -118,10 +117,10 @@ export function CommentCard({
                *                  (h-7 = 28px, mt-0.5 = 2px → centre ≈ 16px)
                *   border-l + border-b + rounded-bl → ∟ curve
                */}
-              <div className="border-l-2 border-border/40 peer-hover:border-primary/60 transition-colors pl-[26px] space-y-3 pb-1">
+              <div className="border-l-2 border-border/40 peer-hover:border-primary/60 transition-colors pl-6.5 space-y-3 pb-1">
                 {comment.replies.map((reply) => (
                   <div key={reply.id} className="relative">
-                    <div className="pointer-events-none absolute -left-[26px] top-0 h-[18px] w-[20px] rounded-bl-[6px] border-b-2 border-l-2 border-border/40" />
+                    <div className="pointer-events-none absolute -left-6.5 top-0 h-4.5 w-5 rounded-bl-[6px] border-b-2 border-l-2 border-border/40" />
 
                     {/* Recursive — handles any nesting depth */}
                     <CommentCard
@@ -140,7 +139,7 @@ export function CommentCard({
             </>
           ) : (
             /* ── Collapsed state ── */
-            <div className="pl-[26px] pb-1 pt-0.5">
+            <div className="pl-6.5 pb-1 pt-0.5">
               <button
                 type="button"
                 onClick={() => setRepliesOpen(true)}

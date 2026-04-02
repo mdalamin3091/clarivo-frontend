@@ -43,7 +43,7 @@ export function CommentInput({
         value={content}
         onChange={setContent}
         placeholder={placeholder}
-        className="rounded-xl border border-border bg-muted/20 [&_.ProseMirror]:!min-h-[52px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 text-sm"
+        className="rounded-xl border border-border bg-muted/20 [&_.ProseMirror]:min-h-13! [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 text-sm"
       />
       <div className="flex items-center justify-end gap-2">
         {onCancel && (

@@ -153,7 +153,7 @@ export function CommentRow({
               value={comment.content as JSONContent}
               onChange={() => {}}
               editable={false}
-              className="border-0 bg-transparent shadow-none [&_.ProseMirror]:!min-h-0 [&_.ProseMirror]:!px-0 [&_.ProseMirror]:!py-0 [&_.ProseMirror]:text-sm [&_.ProseMirror]:text-foreground/90 [&_.ProseMirror]:leading-relaxed"
+              className="border-0 bg-transparent shadow-none [&_.ProseMirror]:min-h-0! [&_.ProseMirror]:px-0! [&_.ProseMirror]:py-0! [&_.ProseMirror]:text-sm [&_.ProseMirror]:text-foreground/90 [&_.ProseMirror]:leading-relaxed"
             />
           </div>
         )}
